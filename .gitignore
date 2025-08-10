@@ -50,3 +50,7 @@ temp/
 
 # Mockups (keep in repo for reference)
 # mockup*.html
+
+# Test files
+test-frontend.js
+clodonic-homepage.png
