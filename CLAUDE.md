@@ -7,57 +7,60 @@ Building a minimalist pattern repository for Claude Code best practices at clodo
 - **Frontend**: Static HTML/CSS with minimal JS
 - **Backend**: Cloudflare Workers with Hono
 - **Database**: Cloudflare D1 (SQLite)
-- **Storage**: Cloudflare R2 (when enabled)
-- **Auth**: GitHub/Google OAuth
-- **Deployment**: Cloudflare Pages + Workers
+- **Auth**: GitHub OAuth (extensible to other providers)
+- **Deployment**: Cloudflare Workers with Git integration
 
 ## Project Structure
 ```
 /clodonic
-  /clodonic-api      - Hono API on Workers
-    /src             - API source code
-    /public          - Static frontend files
-  REQUIREMENTS.md    - Full requirements spec
-  BRANDING.md       - Design system
-  schema.sql        - D1 database schema
+  /clodonic-api          - Hono API on Workers
+    /src                 - API source code
+      - index.ts         - Main API routes
+      - auth.ts          - OAuth logic
+    /public              - Static frontend files
+    - schema.sql         - D1 database schema
+    - wrangler.jsonc     - Cloudflare config
+  - REQUIREMENTS.md      - Full requirements spec
+  - DEPLOYMENT-2025.md   - Current deployment guide
+  - BRANDING.md          - Design system
+  - README.md            - Project overview
 ```
 
 ## Current Status
-- [x] Domain registered (clodonic.ai)
-- [x] Requirements defined
-- [x] Branding established
-- [x] Database schema created
-- [x] Basic API structure
-- [ ] R2 bucket (awaiting activation)
-- [ ] Frontend implementation
-- [ ] Auth system
-- [ ] MCP server
-- [ ] Deploy to production
+- [x] Domain registered and DNS configured (clodonic.ai)
+- [x] MVP complete with all core features
+- [x] GitHub OAuth implemented
+- [x] Database deployed to production
+- [x] Worker deployed with Custom Domains
+- [x] Git repository at github.com/kittholland/clodonic
 
 ## Development Commands
 ```bash
 # Local development
-cd clodonic-api
-npm run dev
+npm run dev              # Start at http://localhost:8787
 
-# Deploy to Cloudflare
-npm run deploy
+# Database
+wrangler d1 execute clodonic-db --local --file=schema.sql   # Local DB
+wrangler d1 execute clodonic-db --remote --file=schema.sql  # Prod DB
 
-# Database migrations
-wrangler d1 execute clodonic-db --local --file=../schema.sql
-wrangler d1 execute clodonic-db --remote --file=../schema.sql
+# Deployment
+wrangler deploy          # Deploy to production
+wrangler tail            # View production logs
 ```
 
-## Key Decisions
-- Unified feed (not separate charts per type)
-- Minimal auth (just display names, no profiles)
-- Card-based design (not HN clone)
-- Focus on quality patterns over social features
+## Key Learnings (2025)
+- **Workers over Pages**: Cloudflare recommends Workers for new projects
+- **Custom Domains**: Automatically handles DNS setup (no manual A records)
+- **Git Integration**: Workers Builds enables auto-deploy on push
+- **Playwright MCP**: Added via `claude mcp add playwright`
+- **Auth Design**: Keep extensible for multiple providers, not just GitHub
 
-## Next Steps
-1. Build the MVP frontend
-2. Implement core API endpoints
-3. Add basic auth with GitHub OAuth
-4. Deploy to clodonic.ai
-5. Seed with initial patterns
-6. Launch on Reddit/HN
+## Documentation
+- **DEPLOYMENT-2025.md**: Step-by-step deployment guide
+- **REQUIREMENTS.md**: Full feature specifications
+- **BRANDING.md**: Design system and visual guidelines
+
+## Production Details
+- **URL**: https://clodonic.ai
+- **GitHub**: https://github.com/kittholland/clodonic
+- **OAuth**: Configured for production callbacks

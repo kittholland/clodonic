@@ -1,7 +1,7 @@
 # Deployment Guide for Clodonic (2025 Workers Approach)
 
 ## Overview
-As of 2025, Cloudflare recommends using **Workers** for new projects (not Pages). This guide uses Workers with Git integration for automated deployments.
+As of 2025, Cloudflare recommends using **Workers** for new projects (not Pages). This guide uses Workers with Custom Domains for automatic DNS setup.
 
 ## Prerequisites
 1. GitHub repository for your project
@@ -85,14 +85,21 @@ wrangler d1 execute clodonic-db --remote --file=schema.sql
 wrangler d1 execute clodonic-db --remote --command="SELECT name FROM sqlite_master WHERE type='table'"
 ```
 
-## Step 6: Configure Custom Domain
+## Step 6: Configure Custom Domain (Automatic DNS)
 
-1. Go to Cloudflare Dashboard > Workers & Pages
-2. Select your worker (`clodonic-api`)
-3. Go to Settings > Triggers > Custom Domains
-4. Add:
-   - `clodonic.ai`
-   - `www.clodonic.ai` (redirect to apex)
+Use **Custom Domains** in wrangler.jsonc for automatic DNS setup:
+```json
+"routes": [
+  { "pattern": "clodonic.ai", "custom_domain": true },
+  { "pattern": "www.clodonic.ai", "custom_domain": true }
+]
+```
+
+When you deploy with `custom_domain: true`, Cloudflare automatically:
+- Creates necessary DNS records
+- Issues SSL certificates
+- Routes traffic to your Worker
+- No manual A records needed!
 
 ## Step 7: Deployment Workflow
 
