@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clodonic - Claude Code Patterns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 2px solid #ff6600;
+            padding: 16px 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        
+        .logo a {
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        
+        .logo .bracket {
+            color: #ff6600;
+            font-weight: 300;
+        }
+        
+        .tagline {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+            margin-top: -2px;
+        }
+        
+        /* Pattern Type Pills */
+        .type-nav {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .type-pill {
+            padding: 6px 14px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #1a1a1a;
+            font-size: 13px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .type-pill:hover {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .type-pill.active {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .type-pill .count {
+            opacity: 0.7;
+            margin-left: 4px;
+        }
+        
+        /* Main Layout */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 30px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        .sidebar h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .filter-group {
+            margin-bottom: 24px;
+        }
+        
+        .filter-option {
+            display: block;
+            padding: 6px 0;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .filter-option:hover {
+            color: #ff6600;
+        }
+        
+        .filter-option.active {
+            color: #ff6600;
+            font-weight: 600;
+        }
+        
+        .filter-option .badge {
+            float: right;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        /* Pattern Cards */
+        .patterns-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .pattern-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .pattern-card:hover {
+            border-color: #ff6600;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.1);
+        }
+        
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .pattern-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            line-height: 1.3;
+        }
+        
+        .pattern-title:hover {
+            color: #ff6600;
+        }
+        
+        .pattern-type {
+            background: #ff6600;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .pattern-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .pattern-preview {
+            background: #f8f8f8;
+            border-left: 3px solid #ff6600;
+            padding: 12px;
+            margin: 12px 0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            color: #333;
+            overflow: hidden;
+            max-height: 80px;
+            position: relative;
+        }
+        
+        .pattern-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(transparent, #f8f8f8);
+        }
+        
+        .pattern-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .pattern-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #999;
+        }
+        
+        .pattern-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .pattern-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 4px 12px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #666;
+        }
+        
+        .action-btn:hover {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .tag {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Submit Button */
+        .submit-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6600;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .submit-float:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 102, 0, 0.4);
+        }
+        
+        /* Search Bar */
+        .search-section {
+            grid-column: 1 / -1;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-bar:focus {
+            outline: none;
+            border-color: #ff6600;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 30px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ff6600;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <div class="logo">
+                    <a href="/">
+                        <span class="bracket">&lt;</span>clodonic<span class="bracket">/&gt;</span>
+                    </a>
+                </div>
+                <div class="tagline">Idiomatic patterns for Claude Code</div>
+            </div>
+            
+            <nav class="type-nav">
+                <a href="/?type=claude_md" class="type-pill">
+                    CLAUDE.md <span class="count">42</span>
+                </a>
+                <a href="/?type=agent" class="type-pill">
+                    Agents <span class="count">38</span>
+                </a>
+                <a href="/?type=prompt" class="type-pill active">
+                    Prompts <span class="count">127</span>
+                </a>
+                <a href="/?type=hook" class="type-pill">
+                    Hooks <span class="count">23</span>
+                </a>
+                <a href="/?type=command" class="type-pill">
+                    Commands <span class="count">19</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <div class="search-section">
+            <input type="text" class="search-bar" placeholder="Search patterns... (e.g. 'parallel tasks', 'python testing', 'git hooks')">
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value">249</div>
+                <div class="stat-label">Patterns</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">1,337</div>
+                <div class="stat-label">Weekly Installs</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">89%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">42</div>
+                <div class="stat-label">Contributors</div>
+            </div>
+        </div>
+        
+        <aside class="sidebar">
+            <div class="filter-group">
+                <h3>Sort By</h3>
+                <a href="?sort=trending" class="filter-option active">
+                    Trending <span class="badge">🔥</span>
+                </a>
+                <a href="?sort=popular" class="filter-option">
+                    Most Used
+                </a>
+                <a href="?sort=recent" class="filter-option">
+                    Recently Added
+                </a>
+                <a href="?sort=top" class="filter-option">
+                    Top Rated
+                </a>
+            </div>
+            
+            <div class="filter-group">
+                <h3>Safety Level</h3>
+                <a href="?safety=read-only" class="filter-option">
+                    Read-Only <span class="badge">12</span>
+                </a>
+                <a href="?safety=modifies" class="filter-option">
+                    Modifies Files <span class="badge">8</span>
+                </a>
+                <a href="?safety=deploys" class="filter-option">
+                    Deploys <span class="badge">3</span>
+                </a>
+            </div>
+            
+            <div class="filter-group">
+                <h3>Languages</h3>
+                <a href="?lang=python" class="filter-option">
+                    Python <span class="badge">45</span>
+                </a>
+                <a href="?lang=javascript" class="filter-option">
+                    JavaScript <span class="badge">38</span>
+                </a>
+                <a href="?lang=rust" class="filter-option">
+                    Rust <span class="badge">12</span>
+                </a>
+            </div>
+        </aside>
+        
+        <div class="patterns-grid">
+            <div class="pattern-card">
+                <div class="pattern-header">
+                    <a href="#" class="pattern-title">Parallel-Safe Analysis Pattern</a>
+                    <span class="pattern-type">Prompt</span>
+                </div>
+                
+                <p class="pattern-description">
+                    Never lose 700 task results again. This prompt ensures all parallel operations are read-only and safe to interrupt.
+                </p>
+                
+                <div class="pattern-preview">
+analyze all [targets] for [issue type] using parallel tasks (read-only operations only, no modifications)
+                </div>
+                
+                <div class="tags">
+                    <span class="tag">parallel</span>
+                    <span class="tag">safety</span>
+                    <span class="tag">analysis</span>
+                </div>
+                
+                <div class="pattern-footer">
+                    <div class="pattern-meta">
+                        <div class="pattern-meta-item">
+                            <span>⬆</span> 445
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>📦</span> 1.2k installs
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>👤</span> kittholland
+                        </div>
+                    </div>
+                    <div class="pattern-actions">
+                        <button class="action-btn vote-btn">
+                            <span>⬆</span> Vote
+                        </button>
+                        <button class="action-btn">Copy</button>
+                        <button class="action-btn">Install</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pattern-card">
+                <div class="pattern-header">
+                    <a href="#" class="pattern-title">Rails TDD Configuration</a>
+                    <span class="pattern-type" style="background: #2ecc71">CLAUDE.md</span>
+                </div>
+                
+                <p class="pattern-description">
+                    Complete Rails setup with RSpec, FactoryBot, and 90% coverage requirements. Enforces TDD practices and prevents deployment without tests.
+                </p>
+                
+                <div class="pattern-preview">
+# Rails Development Rules
+- Minimum 90% test coverage required
+- All PRs must include tests
+- Use RSpec exclusively...
+                </div>
+                
+                <div class="tags">
+                    <span class="tag">ruby</span>
+                    <span class="tag">rails</span>
+                    <span class="tag">testing</span>
+                    <span class="tag">tdd</span>
+                </div>
+                
+                <div class="pattern-footer">
+                    <div class="pattern-meta">
+                        <div class="pattern-meta-item">
+                            <span>⬆</span> 234
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>📦</span> 567 installs
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>👤</span> anonymous
+                        </div>
+                    </div>
+                    <div class="pattern-actions">
+                        <button class="action-btn vote-btn">
+                            <span>⬆</span> Vote
+                        </button>
+                        <button class="action-btn">Copy</button>
+                        <button class="action-btn">Install</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pattern-card">
+                <div class="pattern-header">
+                    <a href="#" class="pattern-title">Database Migration Validator</a>
+                    <span class="pattern-type" style="background: #9b59b6">Agent</span>
+                </div>
+                
+                <p class="pattern-description">
+                    Read-only agent that validates database migrations before execution. Checks for destructive operations and suggests safer alternatives.
+                </p>
+                
+                <div class="pattern-preview">
+name: migration-validator
+tools: [Read, Grep]
+safety: read-only
+description: Validates migrations for safety...
+                </div>
+                
+                <div class="tags">
+                    <span class="tag">database</span>
+                    <span class="tag">validation</span>
+                    <span class="tag">read-only</span>
+                    <span class="tag">safety</span>
+                </div>
+                
+                <div class="pattern-footer">
+                    <div class="pattern-meta">
+                        <div class="pattern-meta-item">
+                            <span>⬆</span> 89
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>📦</span> 234 installs
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>👤</span> dbexpert
+                        </div>
+                    </div>
+                    <div class="pattern-actions">
+                        <button class="action-btn vote-btn">
+                            <span>⬆</span> Vote
+                        </button>
+                        <button class="action-btn">Copy</button>
+                        <button class="action-btn">Install</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="/submit" class="submit-float">+ Submit Pattern</a>
+</body>
+</html>

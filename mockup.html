@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clodonic - Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f6f6ef;
+            color: #000;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: #ff6600;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+        
+        .logo {
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 30px;
+        }
+        
+        .logo a {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        .logo::before {
+            content: '[c] ';
+            opacity: 0.7;
+        }
+        
+        nav {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+        }
+        
+        nav a {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        nav a:hover {
+            text-decoration: underline;
+        }
+        
+        .nav-right {
+            margin-left: auto;
+        }
+        
+        .submit-btn {
+            background: rgba(0,0,0,0.1);
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 13px;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        /* Filter Bar */
+        .filter-bar {
+            background: #e8e8e8;
+            padding: 6px 10px;
+            margin: 10px 0;
+            font-size: 13px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .filter-bar a {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        .filter-bar a.active {
+            font-weight: bold;
+            color: #ff6600;
+        }
+        
+        .filter-bar a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Items List */
+        .items-list {
+            background: white;
+            border: 1px solid #ddd;
+        }
+        
+        .item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .item:hover {
+            background: #fafafa;
+        }
+        
+        .vote-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 40px;
+            padding-top: 2px;
+        }
+        
+        .vote-arrow {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid #828282;
+            cursor: pointer;
+        }
+        
+        .vote-arrow:hover {
+            border-bottom-color: #ff6600;
+        }
+        
+        .vote-count {
+            font-size: 12px;
+            color: #828282;
+            margin-top: 2px;
+        }
+        
+        .item-content {
+            flex: 1;
+        }
+        
+        .item-title {
+            color: #000;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .item-title:visited {
+            color: #828282;
+        }
+        
+        .item-title:hover {
+            text-decoration: underline;
+        }
+        
+        .item-type {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-size: 11px;
+            margin-left: 8px;
+            color: #666;
+        }
+        
+        .item-meta {
+            font-size: 12px;
+            color: #828282;
+            margin-top: 2px;
+        }
+        
+        .item-meta a {
+            color: #828282;
+            text-decoration: none;
+        }
+        
+        .item-meta a:hover {
+            text-decoration: underline;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: #f8f8f8;
+            padding: 0 4px;
+            border-radius: 2px;
+            margin: 0 2px;
+        }
+        
+        /* Detail Page Mock */
+        .detail-page {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .detail-header {
+            border-bottom: 2px solid #ff6600;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .detail-votes {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .detail-description {
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f8f8;
+            border-left: 3px solid #ff6600;
+        }
+        
+        .detail-actions {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            text-decoration: none;
+            color: #000;
+            font-size: 13px;
+        }
+        
+        .btn:hover {
+            background: #e8e8e8;
+        }
+        
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .btn-primary:hover {
+            background: #e55500;
+        }
+        
+        .content-display {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Homepage Mock -->
+    <header>
+        <div class="logo"><a href="/">clodonic</a></div>
+        <nav>
+            <a href="/?type=claude_md">CLAUDE.md</a>
+            <a href="/?type=agent">Agents</a>
+            <a href="/?type=prompt">Prompts</a>
+            <a href="/?type=hook">Hooks</a>
+            <a href="/?type=command">Commands</a>
+            <div class="nav-right">
+                <a href="/submit" class="submit-btn">Submit</a>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="filter-bar">
+            <span>Sort:</span>
+            <a href="/?sort=hot" class="active">Hot</a>
+            <a href="/?sort=top">Top</a>
+            <a href="/?sort=new">New</a>
+            <span style="margin-left: auto; color: #828282;">1,337 patterns shared</span>
+        </div>
+        
+        <div class="items-list">
+            <div class="item">
+                <div class="vote-col">
+                    <div class="vote-arrow"></div>
+                    <div class="vote-count">445</div>
+                </div>
+                <div class="item-content">
+                    <a href="#" class="item-title">Never Use Parallel Tasks for Write Operations</a>
+                    <span class="item-type">prompt</span>
+                    <div class="item-meta">
+                        87 chars • <span class="tag">parallel</span> <span class="tag">safety</span> • 2 hours ago • anonymous
+                    </div>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="vote-col">
+                    <div class="vote-arrow"></div>
+                    <div class="vote-count">234</div>
+                </div>
+                <div class="item-content">
+                    <a href="#" class="item-title">Rails Development with Test Coverage</a>
+                    <span class="item-type">CLAUDE.md</span>
+                    <div class="item-meta">
+                        2.3KB • <span class="tag">ruby</span> <span class="tag">rails</span> <span class="tag">testing</span> • 3 days ago • <a href="#">kittholland</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="vote-col">
+                    <div class="vote-arrow"></div>
+                    <div class="vote-count">89</div>
+                </div>
+                <div class="item-content">
+                    <a href="#" class="item-title">Database Migration Validator</a>
+                    <span class="item-type">agent</span>
+                    <div class="item-meta">
+                        1.8KB • <span class="tag">database</span> <span class="tag">validation</span> <span class="tag">read-only</span> • 1 week ago • anonymous
+                    </div>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="vote-col">
+                    <div class="vote-arrow"></div>
+                    <div class="vote-count">67</div>
+                </div>
+                <div class="item-content">
+                    <a href="#" class="item-title">Prevent Large File Commits</a>
+                    <span class="item-type">hook</span>
+                    <div class="item-meta">
+                        287 bytes • <span class="tag">git</span> <span class="tag">pre-commit</span> • 2 weeks ago • <a href="#">user42</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="vote-col">
+                    <div class="vote-arrow"></div>
+                    <div class="vote-count">45</div>
+                </div>
+                <div class="item-content">
+                    <a href="#" class="item-title">/test-parallel - Check if Task is Parallel-Safe</a>
+                    <span class="item-type">command</span>
+                    <div class="item-meta">
+                        1.2KB • <span class="tag">testing</span> <span class="tag">validation</span> • 3 weeks ago • anonymous
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detail Page Mock -->
+        <div class="detail-page">
+            <div class="detail-header">
+                <div class="detail-title">Rails Development with Test Coverage</div>
+                <div class="detail-votes">
+                    <span>▲ 234 points</span>
+                    <span>•</span>
+                    <span>CLAUDE.md</span>
+                    <span>•</span>
+                    <span>2.3KB</span>
+                    <span>•</span>
+                    <span>Submitted 3 days ago by <a href="#">kittholland</a></span>
+                </div>
+            </div>
+            
+            <div class="detail-description">
+                <strong>Description:</strong><br>
+                Comprehensive CLAUDE.md for Rails applications with strong testing practices. 
+                Includes rules for RSpec, FactoryBot, and parallel test execution. 
+                Emphasizes TDD and maintains 90%+ coverage requirements.
+            </div>
+            
+            <div class="detail-meta">
+                <strong>Tags:</strong> 
+                <span class="tag">ruby</span>
+                <span class="tag">rails</span>
+                <span class="tag">testing</span>
+                <span class="tag">rspec</span>
+                <span class="tag">tdd</span>
+            </div>
+            
+            <div class="detail-actions">
+                <button class="btn btn-primary">Copy</button>
+                <a href="#" class="btn">View Raw</a>
+                <a href="#" class="btn">Download</a>
+                <button class="btn">Install via CLI</button>
+            </div>
+            
+            <div class="content-display">
+# Rails Development Rules
+
+## Testing Requirements
+- Minimum 90% test coverage
+- All PRs must include tests
+- Use RSpec for all tests
+- FactoryBot for test data
+
+## Code Style
+- Follow Ruby Style Guide
+- Use Rubocop with our config
+- Max line length: 100 chars
+
+## Database
+- All migrations reversible
+- Add indexes for foreign keys
+- Use strong_migrations gem
+
+## Performance
+- N+1 queries forbidden
+- Use includes() for associations
+- Cache expensive operations
+            </div>
+        </div>
+    </div>
+</body>
+</html>
