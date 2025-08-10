@@ -457,19 +457,22 @@
             </div>
             
             <nav class="type-nav">
-                <a href="/?type=claude_md" class="type-pill" data-type="claude_md">
+                <a href="#" class="type-pill" data-type="">
+                    All <span class="count">0</span>
+                </a>
+                <a href="#" class="type-pill" data-type="claude_md">
                     CLAUDE.md <span class="count">0</span>
                 </a>
-                <a href="/?type=agent" class="type-pill" data-type="agent">
+                <a href="#" class="type-pill" data-type="agent">
                     Agents <span class="count">0</span>
                 </a>
-                <a href="/?type=prompt" class="type-pill" data-type="prompt">
+                <a href="#" class="type-pill" data-type="prompt">
                     Prompts <span class="count">0</span>
                 </a>
-                <a href="/?type=hook" class="type-pill" data-type="hook">
+                <a href="#" class="type-pill" data-type="hook">
                     Hooks <span class="count">0</span>
                 </a>
-                <a href="/?type=command" class="type-pill" data-type="command">
+                <a href="#" class="type-pill" data-type="command">
                     Commands <span class="count">0</span>
                 </a>
             </nav>
@@ -534,6 +537,7 @@
         let currentOffset = 0;
         let isLoading = false;
         let searchTimeout = null;
+        let allPatterns = []; // Cache for client-side filtering
         
         // Get URL params
         const params = new URLSearchParams(window.location.search);
@@ -553,6 +557,17 @@
             document.querySelectorAll('[data-sort]').forEach(option => {
                 option.classList.toggle('active', option.dataset.sort === currentSort);
             });
+        }
+        
+        // Update URL without page reload
+        function updateUrl() {
+            const params = new URLSearchParams();
+            if (currentSort !== 'hot') params.set('sort', currentSort);
+            if (currentType) params.set('type', currentType);
+            if (currentTag) params.set('tag', currentTag);
+            
+            const newUrl = params.toString() ? `?${params.toString()}` : '/';
+            history.replaceState({}, '', newUrl);
         }
         
         // Format time ago
@@ -640,48 +655,20 @@
             `;
         }
         
-        // Load patterns
-        async function loadPatterns() {
+        // Load all patterns (no filtering on server)
+        async function loadAllPatterns() {
             if (isLoading) return;
             isLoading = true;
             
-            const container = document.getElementById('patterns');
-            container.innerHTML = '<div class="loading">Loading patterns...</div>';
-            
             try {
-                const params = new URLSearchParams({
-                    sort: currentSort,
-                    offset: '0',
-                    limit: '30'
-                });
-                
-                if (currentType) params.append('type', currentType);
-                if (currentTag) params.append('tag', currentTag);
-                
-                const response = await fetch(`/api/items?${params}`);
+                const response = await fetch('/api/items?sort=hot&limit=100');
                 const data = await response.json();
-                
-                container.innerHTML = '';
-                
-                if (data.items.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <h2>No patterns yet</h2>
-                            <p>Be the first to submit a pattern!</p>
-                        </div>
-                    `;
-                } else {
-                    data.items.forEach(item => {
-                        container.innerHTML += renderPatternCard(item);
-                    });
-                }
-                
-                // Update stats
+                allPatterns = data.items;
+                renderPatterns();
                 updateStats();
-                
             } catch (error) {
                 console.error('Failed to load patterns:', error);
-                container.innerHTML = `
+                document.getElementById('patterns').innerHTML = `
                     <div class="empty-state">
                         <h2>Failed to load patterns</h2>
                         <p>Please try again later.</p>
@@ -689,6 +676,47 @@
                 `;
             } finally {
                 isLoading = false;
+            }
+        }
+        
+        // Client-side filtering and rendering
+        function renderPatterns() {
+            const container = document.getElementById('patterns');
+            
+            // Filter patterns
+            let filteredPatterns = allPatterns.slice();
+            
+            if (currentType) {
+                filteredPatterns = filteredPatterns.filter(item => item.type === currentType);
+            }
+            
+            if (currentTag) {
+                filteredPatterns = filteredPatterns.filter(item => 
+                    item.tags && item.tags.includes(currentTag)
+                );
+            }
+            
+            // Sort patterns
+            filteredPatterns.sort((a, b) => {
+                switch (currentSort) {
+                    case 'top':
+                        return (b.votes_up || 0) - (a.votes_up || 0);
+                    case 'new':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    case 'hot':
+                    default:
+                        return ((b.votes_up || 0) - (b.votes_down || 0)) - ((a.votes_up || 0) - (a.votes_down || 0));
+                }
+            });
+            
+            // Render
+            if (filteredPatterns.length === 0) {
+                const message = currentType || currentTag ? 
+                    `<h2>No patterns found</h2><p>Try a different filter.</p>` :
+                    `<h2>No patterns yet</h2><p>Be the first to submit a pattern!</p>`;
+                container.innerHTML = `<div class="empty-state">${message}</div>`;
+            } else {
+                container.innerHTML = filteredPatterns.map(renderPatternCard).join('');
             }
         }
         
@@ -711,25 +739,62 @@
             }
         }
         
-        // Update stats
-        async function updateStats() {
-            try {
-                const response = await fetch('/api/items?limit=1');
-                const data = await response.json();
-                document.getElementById('total-patterns').textContent = data.total || 0;
-                
-                // Update type counts
-                const types = ['claude_md', 'agent', 'prompt', 'hook', 'command'];
-                for (const type of types) {
-                    const resp = await fetch(`/api/items?type=${type}&limit=1`);
-                    const typeData = await resp.json();
-                    const pill = document.querySelector(`[data-type="${type}"] .count`);
-                    if (pill) pill.textContent = typeData.total || 0;
-                }
-            } catch (error) {
-                console.error('Failed to update stats:', error);
+        // Update stats based on current filters
+        function updateStats() {
+            // Filter patterns for current view
+            let filteredPatterns = allPatterns.slice();
+            if (currentTag) {
+                filteredPatterns = filteredPatterns.filter(item => 
+                    item.tags && item.tags.includes(currentTag)
+                );
             }
+            
+            // Update total count
+            document.getElementById('total-patterns').textContent = currentType ? 
+                filteredPatterns.filter(item => item.type === currentType).length :
+                filteredPatterns.length;
+            
+            // Update type counts
+            const typeCounts = {
+                '': filteredPatterns.length,
+                'claude_md': filteredPatterns.filter(item => item.type === 'claude_md').length,
+                'agent': filteredPatterns.filter(item => item.type === 'agent').length,
+                'prompt': filteredPatterns.filter(item => item.type === 'prompt').length,
+                'hook': filteredPatterns.filter(item => item.type === 'hook').length,
+                'command': filteredPatterns.filter(item => item.type === 'command').length
+            };
+            
+            Object.entries(typeCounts).forEach(([type, count]) => {
+                const pill = document.querySelector(`[data-type="${type}"] .count`);
+                if (pill) pill.textContent = count;
+            });
+            
+            // Update other stats (simplified for now)
+            document.getElementById('weekly-installs').textContent = 
+                filteredPatterns.reduce((sum, item) => sum + (item.install_count || 0), 0);
+            document.getElementById('contributors').textContent = 
+                new Set(filteredPatterns.map(item => item.submitter_name).filter(Boolean)).size;
+            document.getElementById('new-today').textContent = 
+                filteredPatterns.filter(item => {
+                    const created = new Date(item.created_at);
+                    const today = new Date();
+                    return created.toDateString() === today.toDateString();
+                }).length;
         }
+        
+        // Handle type filter change
+        document.querySelectorAll('.type-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                e.preventDefault();
+                const newType = pill.dataset.type || null;
+                // Toggle off if clicking the same filter
+                currentType = (currentType === newType) ? null : newType;
+                updateActiveStates();
+                updateUrl();
+                renderPatterns();
+                updateStats();
+            });
+        });
         
         // Handle sort change
         document.querySelectorAll('[data-sort]').forEach(option => {
@@ -737,7 +802,9 @@
                 e.preventDefault();
                 currentSort = option.dataset.sort;
                 updateActiveStates();
-                loadPatterns();
+                updateUrl();
+                renderPatterns();
+                updateStats();
             });
         });
         
@@ -820,8 +887,19 @@
         
         // Initialize
         updateActiveStates();
-        loadPatterns();
+        loadAllPatterns();
         loadTags();
+        
+        // Handle tag clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tag')) {
+                e.preventDefault();
+                currentTag = e.target.textContent;
+                updateUrl();
+                renderPatterns();
+                updateStats();
+            }
+        });
     </script>
     
     <!-- Disclaimer -->
