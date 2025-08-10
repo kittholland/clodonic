@@ -132,6 +132,12 @@ export function validateContent(
   // WARN: Check for potentially dangerous patterns
   const warnings: string[] = [];
   
+  // Check for protective/educational context that reduces warnings
+  const isProtective = /(?:prevent|protect|safe|validate|security|block|avoid|example|demo|tutorial|learn|educational|how\s+to\s+(?:avoid|prevent)|never\s+(?:do|use|run)|don't\s+(?:do|use|run))/i.test(fullText);
+  
+  // Extra strict checking for instructional content types
+  const isInstructional = ['prompt', 'claude_md', 'agent'].includes(type);
+  
   // Type-specific warnings with context awareness
   if (type === 'hook') {
     warnings.push(...checkPatterns(content, WARN_PATTERNS.dangerous_shell, 'dangerous shell commands'));
@@ -159,12 +165,6 @@ export function validateContent(
     warnings.push(...checkPatterns(content, WARN_PATTERNS.data_exfil, 'potential data transmission'));
   }
   
-  // Check for protective/educational context that reduces warnings
-  const isProtective = /(?:prevent|protect|safe|validate|security|block|avoid|example|demo|tutorial|learn|educational|how\s+to\s+(?:avoid|prevent)|never\s+(?:do|use|run)|don't\s+(?:do|use|run))/i.test(fullText);
-  
-  // Extra strict checking for instructional content types
-  const isInstructional = ['prompt', 'claude_md', 'agent'].includes(type);
-  const hasStrictWarnings = isInstructional && !isProtective;
   
   // Apply warnings based on content type and context
   if (warnings.length > 0) {
