@@ -1,0 +1,5 @@
+# For local development (if you create a local OAuth app later)
+# Copy this to .dev.vars and fill in your values
+GITHUB_CLIENT_ID=your_github_client_id_here
+GITHUB_CLIENT_SECRET=your_github_client_secret_here
+SITE_URL=http://localhost:8787

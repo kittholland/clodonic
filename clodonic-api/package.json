@@ -1,0 +1,20 @@
+{
+	"name": "clodonic-api",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy --minify",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"typecheck": "tsc --noEmit",
+		"test": "echo 'No tests configured yet' && exit 0"
+	},
+	"dependencies": {
+		"@types/js-yaml": "^4.0.9",
+		"hono": "^4.9.0",
+		"js-yaml": "^4.1.0",
+		"zod": "^4.0.17"
+	},
+	"devDependencies": {
+		"wrangler": "^4.28.1"
+	}
+}

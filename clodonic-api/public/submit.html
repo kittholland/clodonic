@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Pattern - Clodonic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 2px solid #ff6600;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        
+        .logo a {
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        
+        .logo .bracket {
+            color: #ff6600;
+            font-weight: 300;
+        }
+        
+        .tagline {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+            margin-top: -2px;
+        }
+        
+        /* Form Container */
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .form-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .required {
+            color: #ff6600;
+        }
+        
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #ff6600;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .code-input {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 200px;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* Type selector */
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .type-option {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .type-option:hover {
+            border-color: #ff6600;
+        }
+        
+        .type-option.selected {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .type-option .type-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .type-option .type-desc {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        /* Tags input */
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 44px;
+        }
+        
+        .tag-chip {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .tag-chip .remove {
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .tag-input-field {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            min-width: 100px;
+        }
+        
+        /* Buttons */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e55500;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+        
+        /* Character counter */
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .char-counter.warning {
+            color: #ff6600;
+        }
+        
+        .char-counter.error {
+            color: #d32f2f;
+        }
+        
+        /* Success message */
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .warning-message {
+            background: #ff9800;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <div class="logo">
+                    <a href="/">
+                        <span class="bracket">&lt;</span>clodonic<span class="bracket">/&gt;</span>
+                    </a>
+                </div>
+                <div class="tagline">Idiomatic patterns for Claude Code</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <div class="form-card">
+            <h1 class="form-title">Submit a Pattern</h1>
+            <p class="form-subtitle">Share your Claude Code patterns with the community</p>
+            
+            <div class="success-message" id="success-message">
+                Pattern submitted successfully! Redirecting...
+            </div>
+            
+            <div class="warning-message" id="warning-message">
+                ⚠️ Security Warning: Your pattern was submitted but contains potentially dangerous content. Please ensure it's safe before others use it.
+            </div>
+            
+            <div class="error-message" id="error-message">
+                Failed to submit pattern. Please try again.
+            </div>
+            
+            <form id="submit-form">
+                <div class="form-group">
+                    <label>Pattern Type <span class="required">*</span></label>
+                    <div class="type-selector">
+                        <div class="type-option" data-type="claude_md">
+                            <div class="type-name">CLAUDE.md</div>
+                            <div class="type-desc">Project instructions</div>
+                        </div>
+                        <div class="type-option" data-type="agent">
+                            <div class="type-name">Agent</div>
+                            <div class="type-desc">Task agents</div>
+                        </div>
+                        <div class="type-option" data-type="prompt">
+                            <div class="type-name">Prompt</div>
+                            <div class="type-desc">Effective prompts</div>
+                        </div>
+                        <div class="type-option" data-type="hook">
+                            <div class="type-name">Hook</div>
+                            <div class="type-desc">Shell hooks</div>
+                        </div>
+                        <div class="type-option" data-type="command">
+                            <div class="type-name">Command</div>
+                            <div class="type-desc">CLI commands</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="type" id="type" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">Title <span class="required">*</span></label>
+                    <input type="text" id="title" name="title" maxlength="100" required placeholder="e.g., Parallel-Safe Analysis Pattern">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description <span class="required">*</span></label>
+                    <textarea id="description" name="description" maxlength="300" required placeholder="Brief description of what this pattern does and when to use it"></textarea>
+                    <div class="help-text">Explain the problem this pattern solves</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Pattern Content <span class="required">*</span></label>
+                    <textarea id="content" name="content" class="code-input" required placeholder="Paste your pattern content here..."></textarea>
+                    <div class="char-counter" id="char-counter">0 / 10240 characters</div>
+                    <div class="help-text" id="content-help">Maximum size varies by type</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tags-input">Tags</label>
+                    <div class="tags-input" id="tags-container">
+                        <input type="text" class="tag-input-field" id="tags-input" placeholder="Type and press Enter">
+                    </div>
+                    <div class="help-text">Add up to 5 tags (e.g., python, testing, safety)</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Submit Pattern</button>
+                    <a href="/" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = '';
+        const tags = [];
+        const limits = {
+            claude_md: 10240,
+            agent: 5120,
+            prompt: 500,
+            hook: 5120,
+            command: 2048
+        };
+        
+        // Type selection
+        document.querySelectorAll('.type-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedType = option.dataset.type;
+                document.getElementById('type').value = selectedType;
+                updateCharCounter();
+                updateContentHelp();
+            });
+        });
+        
+        // Character counter
+        function updateCharCounter() {
+            const content = document.getElementById('content').value;
+            const counter = document.getElementById('char-counter');
+            const limit = selectedType ? limits[selectedType] : 10240;
+            const length = content.length;
+            
+            counter.textContent = `${length} / ${limit} characters`;
+            
+            if (length > limit) {
+                counter.classList.add('error');
+                counter.classList.remove('warning');
+            } else if (length > limit * 0.9) {
+                counter.classList.add('warning');
+                counter.classList.remove('error');
+            } else {
+                counter.classList.remove('warning', 'error');
+            }
+        }
+        
+        function updateContentHelp() {
+            const help = document.getElementById('content-help');
+            if (selectedType) {
+                help.textContent = `Maximum ${limits[selectedType]} characters for ${selectedType.replace('_', ' ')}`;
+            }
+        }
+        
+        document.getElementById('content').addEventListener('input', updateCharCounter);
+        
+        // Tags handling
+        const tagsInput = document.getElementById('tags-input');
+        const tagsContainer = document.getElementById('tags-container');
+        
+        tagsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const value = tagsInput.value.trim().toLowerCase();
+                if (value && tags.length < 5 && !tags.includes(value)) {
+                    addTag(value);
+                    tagsInput.value = '';
+                }
+            }
+        });
+        
+        function addTag(tag) {
+            tags.push(tag);
+            const chip = document.createElement('div');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `${tag} <span class="remove" data-tag="${tag}">×</span>`;
+            tagsContainer.insertBefore(chip, tagsInput);
+            
+            chip.querySelector('.remove').addEventListener('click', () => {
+                removeTag(tag);
+                chip.remove();
+            });
+        }
+        
+        function removeTag(tag) {
+            const index = tags.indexOf(tag);
+            if (index > -1) {
+                tags.splice(index, 1);
+            }
+        }
+        
+        // Form submission
+        document.getElementById('submit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedType) {
+                alert('Please select a pattern type');
+                return;
+            }
+            
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const content = document.getElementById('content').value;
+            
+            if (content.length > limits[selectedType]) {
+                alert(`Content exceeds maximum length for ${selectedType}`);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/items', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: selectedType,
+                        title,
+                        description,
+                        content,
+                        tags
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Handle security warnings
+                    if (data.warning) {
+                        document.getElementById('warning-message').innerHTML = 
+                            `⚠️ Security Warning: ${data.warning}<br><small>Your pattern was still submitted but may require user caution.</small>`;
+                        document.getElementById('warning-message').style.display = 'block';
+                    } else {
+                        document.getElementById('warning-message').style.display = 'none';
+                    }
+                    
+                    document.getElementById('success-message').style.display = 'block';
+                    document.getElementById('error-message').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        window.location.href = `/pattern/${data.id}`;
+                    }, data.warning ? 4000 : 2000); // Longer delay if there's a warning
+                } else if (response.status === 409) {
+                    const data = await response.json();
+                    alert(`This pattern already exists. View it at /pattern/${data.existing_id}`);
+                } else {
+                    const error = await response.json();
+                    let errorMessage = error.error || 'Failed to submit pattern';
+                    
+                    // Provide helpful suggestions based on error type
+                    if (error.validation_type === 'structure') {
+                        errorMessage += '<br><br><strong>💡 Suggestions:</strong><br>';
+                        
+                        if (errorMessage.includes('YAML')) {
+                            errorMessage += '• Check your YAML syntax at <a href="https://yamlchecker.com" target="_blank">yamlchecker.com</a><br>';
+                            errorMessage += '• Ensure you have "name:" and "description:" fields<br>';
+                            errorMessage += '• Use spaces, not tabs for indentation';
+                        } else if (errorMessage.includes('shell') || errorMessage.includes('syntax')) {
+                            errorMessage += '• Check for unmatched quotes or brackets<br>';
+                            errorMessage += '• Add shebang line: #!/bin/bash<br>';
+                            errorMessage += '• Use "exit 0" for success, "exit 2" to block operations';
+                        } else if (errorMessage.includes('too short')) {
+                            errorMessage += '• Make your content more descriptive<br>';
+                            errorMessage += '• Add specific details about what it does<br>';
+                            errorMessage += '• Include usage examples or context';
+                        }
+                    } else if (error.blocked) {
+                        errorMessage += '<br><br><strong>🚫 Content Policy:</strong><br>';
+                        errorMessage += 'Your submission was blocked to protect users. Consider:<br>';
+                        errorMessage += '• Remove promotional language<br>';
+                        errorMessage += '• Focus on educational content<br>';
+                        errorMessage += '• Avoid suspicious links or requests';
+                    } else if (error.field) {
+                        errorMessage += `<br><br><strong>📍 Issue with field:</strong> ${error.field}`;
+                    }
+                    
+                    document.getElementById('error-message').innerHTML = errorMessage;
+                    document.getElementById('error-message').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Submit failed:', error);
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

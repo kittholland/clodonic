@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern - Clodonic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 2px solid #ff6600;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        
+        .logo a {
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        
+        .logo .bracket {
+            color: #ff6600;
+            font-weight: 300;
+        }
+        
+        .tagline {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+            margin-top: -2px;
+        }
+        
+        /* Pattern Detail */
+        .pattern-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .pattern-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .pattern-header {
+            margin-bottom: 24px;
+        }
+        
+        .pattern-title {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .pattern-type {
+            display: inline-block;
+            background: #ff6600;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        
+        .pattern-description {
+            font-size: 16px;
+            color: #444;
+            margin-bottom: 20px;
+        }
+        
+        .pattern-meta {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 13px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .pattern-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Pattern Content */
+        .pattern-content {
+            margin: 24px 0;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .pattern-content pre {
+            margin: 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Tags */
+        .pattern-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .tag {
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            color: #444;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        
+        .tag:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Actions */
+        .pattern-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #e55500;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+        
+        .vote-btn {
+            background: white;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        
+        .vote-btn:hover {
+            border-color: #ff6600;
+            color: #ff6600;
+        }
+        
+        .vote-btn.voted {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        /* Back link */
+        .back-link {
+            display: inline-block;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .back-link:hover {
+            color: #ff6600;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        /* Error */
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .error-state h2 {
+            margin-bottom: 12px;
+        }
+        
+        .error-state p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <div class="logo">
+                    <a href="/">
+                        <span class="bracket">&lt;</span>clodonic<span class="bracket">/&gt;</span>
+                    </a>
+                </div>
+                <div class="tagline">Idiomatic patterns for Claude Code</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="pattern-container">
+        <a href="/" class="back-link">← Back to patterns</a>
+        
+        <div id="pattern-detail" class="pattern-card">
+            <div class="loading">Loading pattern...</div>
+        </div>
+    </div>
+
+    <script>
+        // Get pattern ID from URL
+        const pathParts = window.location.pathname.split('/');
+        const patternId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        
+        async function loadPattern() {
+            if (!patternId || patternId === 'pattern.html') {
+                showError('Pattern not found');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/items/${patternId}`);
+                if (!response.ok) {
+                    showError('Pattern not found');
+                    return;
+                }
+                
+                const pattern = await response.json();
+                renderPattern(pattern);
+            } catch (error) {
+                console.error('Failed to load pattern:', error);
+                showError('Failed to load pattern');
+            }
+        }
+        
+        function renderPattern(pattern) {
+            const container = document.getElementById('pattern-detail');
+            
+            const typeLabels = {
+                claude_md: 'CLAUDE.md',
+                agent: 'Agent',
+                prompt: 'Prompt',
+                hook: 'Hook',
+                command: 'Command'
+            };
+            
+            container.innerHTML = `
+                <div class="pattern-header">
+                    <div class="pattern-type">${typeLabels[pattern.type] || pattern.type}</div>
+                    <h1 class="pattern-title">${pattern.title}</h1>
+                    <p class="pattern-description">${pattern.description}</p>
+                    
+                    <div class="pattern-meta">
+                        <div class="pattern-meta-item">
+                            <span>⬆</span> ${pattern.votes_up || 0} votes
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>📦</span> ${pattern.install_count || 0} installs
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>👤</span> ${pattern.submitter_name || 'anonymous'}
+                        </div>
+                        <div class="pattern-meta-item">
+                            <span>📅</span> ${new Date(pattern.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pattern-content">
+                    <pre>${escapeHtml(pattern.content)}</pre>
+                </div>
+                
+                ${pattern.tags && pattern.tags.length > 0 ? `
+                    <div class="pattern-tags">
+                        ${pattern.tags.map(tag => 
+                            `<a href="/?tag=${tag.name || tag}" class="tag">${tag.name || tag}</a>`
+                        ).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="pattern-actions">
+                    <button class="btn vote-btn" onclick="votePattern(${pattern.id})">
+                        <span>⬆</span> Vote
+                    </button>
+                    <button class="btn btn-primary" onclick="copyPattern(${pattern.id})">
+                        Copy Pattern
+                    </button>
+                    <button class="btn btn-secondary" onclick="downloadPattern(${pattern.id})">
+                        Download
+                    </button>
+                </div>
+            `;
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('pattern-detail');
+            container.innerHTML = `
+                <div class="error-state">
+                    <h2>${message}</h2>
+                    <p>The pattern you're looking for doesn't exist.</p>
+                </div>
+            `;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        async function votePattern(id) {
+            try {
+                const response = await fetch(`/api/items/${id}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vote: 1 })
+                });
+                
+                if (response.status === 401) {
+                    alert('Please sign in to vote');
+                    return;
+                }
+                
+                if (response.ok) {
+                    const btn = document.querySelector('.vote-btn');
+                    btn.classList.toggle('voted');
+                    loadPattern(); // Reload to update vote count
+                }
+            } catch (error) {
+                console.error('Vote failed:', error);
+            }
+        }
+        
+        async function copyPattern(id) {
+            try {
+                const response = await fetch(`/api/items/${id}`);
+                const pattern = await response.json();
+                await navigator.clipboard.writeText(pattern.content);
+                alert('Pattern copied to clipboard!');
+            } catch (error) {
+                console.error('Failed to copy pattern:', error);
+            }
+        }
+        
+        function downloadPattern(id) {
+            fetch(`/api/items/${id}`)
+                .then(response => response.json())
+                .then(pattern => {
+                    const blob = new Blob([pattern.content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${pattern.title.toLowerCase().replace(/\s+/g, '-')}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                })
+                .catch(error => console.error('Download failed:', error));
+        }
+        
+        // Load pattern on page load
+        loadPattern();
+    </script>
+</body>
+</html>

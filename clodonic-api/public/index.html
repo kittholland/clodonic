@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clodonic - Claude Code Patterns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 2px solid #ff6600;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        
+        .logo a {
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        
+        .logo .bracket {
+            color: #ff6600;
+            font-weight: 300;
+        }
+        
+        .tagline {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+            margin-top: -2px;
+        }
+        
+        /* Pattern Type Pills */
+        .type-nav {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .type-pill {
+            padding: 6px 14px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #1a1a1a;
+            font-size: 13px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .type-pill:hover {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .type-pill.active {
+            background: #ff6600;
+            color: white;
+        }
+        
+        .type-pill .count {
+            opacity: 0.7;
+            margin-left: 4px;
+        }
+        
+        /* Main Layout */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 30px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        
+        .sidebar h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .filter-group {
+            margin-bottom: 24px;
+        }
+        
+        .filter-option {
+            display: block;
+            padding: 6px 0;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        
+        .filter-option:hover {
+            color: #ff6600;
+        }
+        
+        .filter-option.active {
+            color: #ff6600;
+            font-weight: 600;
+        }
+        
+        .filter-option .badge {
+            float: right;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        /* Pattern Cards */
+        .patterns-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .pattern-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        
+        .pattern-card:hover {
+            border-color: #ff6600;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.1);
+        }
+        
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .pattern-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-decoration: none;
+            line-height: 1.3;
+            cursor: pointer;
+        }
+        
+        .pattern-title:hover {
+            color: #ff6600;
+        }
+        
+        .warning-badge {
+            background: #ff9800;
+            color: white;
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 8px;
+            font-weight: normal;
+            cursor: help;
+        }
+        
+        .pattern-type {
+            background: #ff6600;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .pattern-type.claude-md {
+            background: #2ecc71;
+        }
+        
+        .pattern-type.agent {
+            background: #9b59b6;
+        }
+        
+        .pattern-type.hook {
+            background: #3498db;
+        }
+        
+        .pattern-type.command {
+            background: #e74c3c;
+        }
+        
+        .pattern-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .pattern-preview {
+            background: #f8f8f8;
+            border-left: 3px solid #ff6600;
+            padding: 12px;
+            margin: 12px 0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            color: #333;
+            overflow: hidden;
+            max-height: 80px;
+            position: relative;
+            white-space: pre-wrap;
+        }
+        
+        .pattern-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(transparent, #f8f8f8);
+        }
+        
+        .pattern-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .pattern-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #999;
+        }
+        
+        .pattern-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .pattern-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 4px 12px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #666;
+        }
+        
+        .action-btn:hover {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .vote-btn.voted {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .tag {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .tag:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Submit Button */
+        .submit-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6600;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .submit-float:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 102, 0, 0.4);
+        }
+        
+        /* Search Bar */
+        .search-section {
+            grid-column: 1 / -1;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+        
+        .search-bar:focus {
+            outline: none;
+            border-color: #ff6600;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 30px;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ff6600;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Loading & Empty States */
+        .loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+        
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .type-nav {
+                overflow-x: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <div class="logo">
+                    <a href="/">
+                        <span class="bracket">&lt;</span>clodonic<span class="bracket">/&gt;</span>
+                    </a>
+                </div>
+                <div class="tagline">Idiomatic patterns for Claude Code</div>
+            </div>
+            
+            <nav class="type-nav">
+                <a href="/?type=claude_md" class="type-pill" data-type="claude_md">
+                    CLAUDE.md <span class="count">0</span>
+                </a>
+                <a href="/?type=agent" class="type-pill" data-type="agent">
+                    Agents <span class="count">0</span>
+                </a>
+                <a href="/?type=prompt" class="type-pill" data-type="prompt">
+                    Prompts <span class="count">0</span>
+                </a>
+                <a href="/?type=hook" class="type-pill" data-type="hook">
+                    Hooks <span class="count">0</span>
+                </a>
+                <a href="/?type=command" class="type-pill" data-type="command">
+                    Commands <span class="count">0</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <div class="search-section">
+            <input type="text" class="search-bar" placeholder="Search patterns... (e.g. 'parallel tasks', 'python testing', 'git hooks')" id="search-input">
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="total-patterns">0</div>
+                <div class="stat-label">Patterns</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="weekly-installs">0</div>
+                <div class="stat-label">Weekly Installs</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="contributors">0</div>
+                <div class="stat-label">Contributors</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="new-today">0</div>
+                <div class="stat-label">New Today</div>
+            </div>
+        </div>
+        
+        <aside class="sidebar">
+            <div class="filter-group">
+                <h3>Sort By</h3>
+                <a class="filter-option active" data-sort="hot">
+                    Trending <span class="badge">🔥</span>
+                </a>
+                <a class="filter-option" data-sort="top">
+                    Most Voted
+                </a>
+                <a class="filter-option" data-sort="new">
+                    Recently Added
+                </a>
+            </div>
+            
+            <div class="filter-group" id="popular-tags">
+                <h3>Popular Tags</h3>
+            </div>
+        </aside>
+        
+        <div class="patterns-grid" id="patterns">
+            <div class="loading">Loading patterns...</div>
+        </div>
+    </div>
+    
+    <a href="/submit.html" class="submit-float">+ Submit Pattern</a>
+    
+    <script>
+        // State
+        let currentSort = 'hot';
+        let currentType = null;
+        let currentTag = null;
+        let currentOffset = 0;
+        let isLoading = false;
+        let searchTimeout = null;
+        
+        // Get URL params
+        const params = new URLSearchParams(window.location.search);
+        currentType = params.get('type');
+        currentTag = params.get('tag');
+        currentSort = params.get('sort') || 'hot';
+        
+        // Update active states
+        function updateActiveStates() {
+            // Type pills
+            document.querySelectorAll('.type-pill').forEach(pill => {
+                const pillType = pill.dataset.type;
+                pill.classList.toggle('active', pillType === currentType);
+            });
+            
+            // Sort options
+            document.querySelectorAll('[data-sort]').forEach(option => {
+                option.classList.toggle('active', option.dataset.sort === currentSort);
+            });
+        }
+        
+        // Format time ago
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+            
+            for (const [name, value] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / value);
+                if (interval >= 1) {
+                    return interval === 1 ? `1 ${name} ago` : `${interval} ${name}s ago`;
+                }
+            }
+            return 'just now';
+        }
+        
+        // Format type display
+        function formatType(type) {
+            const typeMap = {
+                'claude_md': 'CLAUDE.md',
+                'agent': 'Agent',
+                'prompt': 'Prompt',
+                'hook': 'Hook',
+                'command': 'Command'
+            };
+            return typeMap[type] || type;
+        }
+        
+        // Get type class
+        function getTypeClass(type) {
+            return type.replace('_', '-');
+        }
+        
+        // Render pattern card
+        function renderPatternCard(item) {
+            const preview = item.content ? item.content.substring(0, 200) : '';
+            
+            return `
+                <div class="pattern-card" data-id="${item.id}">
+                    <div class="pattern-header">
+                        <a href="/pattern/${item.id}" class="pattern-title">
+                            ${item.title}
+                            ${item.has_warnings ? '<span class="warning-badge" title="This pattern contains potentially dangerous content. Review carefully before use.">⚠️</span>' : ''}
+                        </a>
+                        <span class="pattern-type ${getTypeClass(item.type)}">${formatType(item.type)}</span>
+                    </div>
+                    
+                    <p class="pattern-description">${item.description}</p>
+                    
+                    ${preview ? `<div class="pattern-preview">${preview}</div>` : ''}
+                    
+                    ${item.tags && item.tags.length > 0 ? `
+                        <div class="tags">
+                            ${item.tags.map(tag => `<a href="/?tag=${tag}" class="tag">${tag}</a>`).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="pattern-footer">
+                        <div class="pattern-meta">
+                            <div class="pattern-meta-item">
+                                <span>⬆</span> ${item.votes_up || 0}
+                            </div>
+                            <div class="pattern-meta-item">
+                                <span>📦</span> ${item.install_count || 0} installs
+                            </div>
+                            <div class="pattern-meta-item">
+                                <span>👤</span> ${item.submitter_name || 'anonymous'}
+                            </div>
+                        </div>
+                        <div class="pattern-actions">
+                            <button class="action-btn vote-btn ${item.user_voted ? 'voted' : ''}" data-id="${item.id}">
+                                <span>⬆</span> Vote
+                            </button>
+                            <button class="action-btn" onclick="copyPattern(${item.id})">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Load patterns
+        async function loadPatterns() {
+            if (isLoading) return;
+            isLoading = true;
+            
+            const container = document.getElementById('patterns');
+            container.innerHTML = '<div class="loading">Loading patterns...</div>';
+            
+            try {
+                const params = new URLSearchParams({
+                    sort: currentSort,
+                    offset: '0',
+                    limit: '30'
+                });
+                
+                if (currentType) params.append('type', currentType);
+                if (currentTag) params.append('tag', currentTag);
+                
+                const response = await fetch(`/api/items?${params}`);
+                const data = await response.json();
+                
+                container.innerHTML = '';
+                
+                if (data.items.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h2>No patterns yet</h2>
+                            <p>Be the first to submit a pattern!</p>
+                        </div>
+                    `;
+                } else {
+                    data.items.forEach(item => {
+                        container.innerHTML += renderPatternCard(item);
+                    });
+                }
+                
+                // Update stats
+                updateStats();
+                
+            } catch (error) {
+                console.error('Failed to load patterns:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>Failed to load patterns</h2>
+                        <p>Please try again later.</p>
+                    </div>
+                `;
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        // Load popular tags
+        async function loadTags() {
+            try {
+                const response = await fetch('/api/tags');
+                const tags = await response.json();
+                
+                const container = document.getElementById('popular-tags');
+                const tagsHtml = tags.slice(0, 10).map(tag => `
+                    <a class="filter-option" href="/?tag=${tag.name}">
+                        ${tag.name} <span class="badge">${tag.count}</span>
+                    </a>
+                `).join('');
+                
+                container.innerHTML = '<h3>Popular Tags</h3>' + tagsHtml;
+            } catch (error) {
+                console.error('Failed to load tags:', error);
+            }
+        }
+        
+        // Update stats
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/items?limit=1');
+                const data = await response.json();
+                document.getElementById('total-patterns').textContent = data.total || 0;
+                
+                // Update type counts
+                const types = ['claude_md', 'agent', 'prompt', 'hook', 'command'];
+                for (const type of types) {
+                    const resp = await fetch(`/api/items?type=${type}&limit=1`);
+                    const typeData = await resp.json();
+                    const pill = document.querySelector(`[data-type="${type}"] .count`);
+                    if (pill) pill.textContent = typeData.total || 0;
+                }
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+            }
+        }
+        
+        // Handle sort change
+        document.querySelectorAll('[data-sort]').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentSort = option.dataset.sort;
+                updateActiveStates();
+                loadPatterns();
+            });
+        });
+        
+        // Handle voting
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.vote-btn')) {
+                const btn = e.target.closest('.vote-btn');
+                const id = btn.dataset.id;
+                
+                try {
+                    const response = await fetch(`/api/items/${id}/vote`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ vote: 1 })
+                    });
+                    
+                    if (response.status === 401) {
+                        alert('Please sign in to vote');
+                        return;
+                    }
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        btn.classList.toggle('voted');
+                        const voteCount = btn.closest('.pattern-card').querySelector('.pattern-meta-item span');
+                        if (voteCount) voteCount.nextSibling.textContent = ` ${data.votes_up}`;
+                    }
+                } catch (error) {
+                    console.error('Vote failed:', error);
+                }
+            }
+        });
+        
+        // Handle search
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                const query = e.target.value.trim();
+                if (query.length < 2) {
+                    loadPatterns();
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    const container = document.getElementById('patterns');
+                    container.innerHTML = '';
+                    
+                    if (data.results.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <h2>No results found</h2>
+                                <p>Try different keywords.</p>
+                            </div>
+                        `;
+                    } else {
+                        data.results.forEach(item => {
+                            container.innerHTML += renderPatternCard(item);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Search failed:', error);
+                }
+            }, 300);
+        });
+        
+        // Copy pattern
+        async function copyPattern(id) {
+            try {
+                const response = await fetch(`/api/items/${id}`);
+                const item = await response.json();
+                await navigator.clipboard.writeText(item.content);
+                alert('Pattern copied to clipboard!');
+            } catch (error) {
+                console.error('Failed to copy pattern:', error);
+            }
+        }
+        
+        // Initialize
+        updateActiveStates();
+        loadPatterns();
+        loadTags();
+    </script>
+    
+    <!-- Disclaimer -->
+    <footer style="background: #f8f8f8; border-top: 1px solid #ddd; padding: 24px 0; margin-top: 48px; text-align: center;">
+        <div class="container" style="max-width: 800px; margin: 0 auto; padding: 0 16px;">
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 16px; margin-bottom: 16px; text-align: left;">
+                <h4 style="color: #856404; margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">⚠️ User Content Disclaimer</h4>
+                <p style="color: #856404; font-size: 13px; margin: 0; line-height: 1.5;">
+                    All patterns, prompts, agents, hooks, and commands on this site are <strong>user-submitted content</strong>. 
+                    While we filter obvious spam and malicious content, you should <strong>always review any pattern carefully</strong> 
+                    before using it with Claude Code. Patterns can direct AI behavior in unexpected ways and may contain 
+                    commands that could affect your system. Use at your own discretion.
+                </p>
+            </div>
+            <p style="color: #666; font-size: 12px; margin: 0;">
+                Clodonic &copy; 2025 • Community-driven Claude Code patterns • 
+                <a href="https://github.com/kittholland/clodonic" style="color: #ff6600;">Open Source</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
