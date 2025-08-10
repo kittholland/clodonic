@@ -1,0 +1,7 @@
+{
+  "type": "hook",
+  "title": "Protect Against rm -rf",
+  "description": "Hook to prevent dangerous file deletion commands",
+  "content": "#!/bin/bash\nif echo \"$1\" | grep -q \"rm.*-rf\"; then\n  echo \"Blocked dangerous rm -rf command\"\n  exit 2\nfi",
+  "tags": ["security", "safe"]
+}

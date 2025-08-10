@@ -61,33 +61,170 @@
             margin-top: -2px;
         }
         
-        /* Form Container */
-        .form-container {
+        /* Container */
+        .container {
             max-width: 800px;
             margin: 40px auto;
             padding: 0 20px;
         }
         
-        .form-card {
+        /* Drop Zone */
+        .drop-zone {
             background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 3px dashed #ddd;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
         }
         
-        .form-title {
-            font-size: 24px;
+        .drop-zone:hover {
+            border-color: #ff6600;
+            background: #fff5f0;
+        }
+        
+        .drop-zone.dragover {
+            border-color: #ff6600;
+            background: #fff5f0;
+            transform: scale(1.02);
+        }
+        
+        .drop-zone.has-file {
+            border-style: solid;
+            border-color: #4caf50;
+            background: #f9fff9;
+            padding: 30px;
+        }
+        
+        .drop-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #ff6600;
+        }
+        
+        .drop-title {
+            font-size: 20px;
+            font-weight: 600;
             margin-bottom: 8px;
         }
         
-        .form-subtitle {
+        .drop-subtitle {
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .browse-btn {
+            background: #ff6600;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .browse-btn:hover {
+            background: #e55500;
+        }
+        
+        .or-divider {
+            margin: 20px 0;
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .paste-link {
+            color: #ff6600;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .paste-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* File Preview */
+        .file-preview {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .file-icon {
+            font-size: 32px;
+            color: #666;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .file-details {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .file-type-badge {
+            display: inline-block;
+            background: #ff6600;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+        
+        .remove-file {
+            color: #999;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        .remove-file:hover {
+            color: #d32f2f;
+        }
+        
+        /* Form Section */
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
         
         /* Form Elements */
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         
         label {
@@ -121,14 +258,22 @@
         }
         
         textarea {
-            min-height: 120px;
+            min-height: 100px;
             resize: vertical;
         }
         
-        .code-input {
+        .code-preview {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
             font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 13px;
-            min-height: 200px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
         
         .help-text {
@@ -137,44 +282,7 @@
             margin-top: 4px;
         }
         
-        /* Type selector */
-        .type-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .type-option {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        
-        .type-option:hover {
-            border-color: #ff6600;
-        }
-        
-        .type-option.selected {
-            background: #ff6600;
-            color: white;
-            border-color: #ff6600;
-        }
-        
-        .type-option .type-name {
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
-        
-        .type-option .type-desc {
-            font-size: 11px;
-            opacity: 0.8;
-        }
-        
-        /* Tags input */
+        /* Tags */
         .tags-input {
             display: flex;
             flex-wrap: wrap;
@@ -183,6 +291,50 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             min-height: 44px;
+            position: relative;
+        }
+        
+        .tag-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tag-suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .tag-suggestion:hover,
+        .tag-suggestion.selected {
+            background: #fff5f0;
+        }
+        
+        .tag-suggestion.disabled {
+            color: #999;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+        
+        .tag-suggestion small {
+            color: #666;
+            margin-left: 8px;
+        }
+        
+        .tag-suggestion strong {
+            color: #ff6600;
+            font-weight: 600;
         }
         
         .tag-chip {
@@ -246,6 +398,79 @@
             background: #f5f5f5;
         }
         
+        /* Manual Entry */
+        .manual-entry {
+            display: none;
+        }
+        
+        .manual-entry.active {
+            display: block;
+        }
+        
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .type-option {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .type-option:hover {
+            border-color: #ff6600;
+        }
+        
+        .type-option.selected {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .type-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .type-desc {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        /* Messages */
+        .message {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .message.warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .message.error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .message.info {
+            background: #2196f3;
+            color: white;
+        }
+        
         /* Character counter */
         .char-counter {
             text-align: right;
@@ -260,34 +485,6 @@
         
         .char-counter.error {
             color: #d32f2f;
-        }
-        
-        /* Success message */
-        .success-message {
-            background: #4caf50;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .warning-message {
-            background: #ff9800;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .error-message {
-            background: #f44336;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
         }
     </style>
 </head>
@@ -304,25 +501,50 @@
             </div>
         </div>
     </header>
+    
+    <!-- Auth required message (hidden by default) -->
+    <div id="auth-required" style="display: none; max-width: 600px; margin: 60px auto; padding: 40px; background: white; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-bottom: 16px;">Sign in Required</h2>
+        <p style="color: #666; margin-bottom: 24px;">You need to sign in with GitHub to submit patterns.</p>
+        <a href="/api/auth/github" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: #24292e; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            Sign in with GitHub
+        </a>
+    </div>
 
-    <div class="form-container">
-        <div class="form-card">
-            <h1 class="form-title">Submit a Pattern</h1>
-            <p class="form-subtitle">Share your Claude Code patterns with the community</p>
-            
-            <div class="success-message" id="success-message">
-                Pattern submitted successfully! Redirecting...
+    <div class="container">
+        <div class="message success" id="success-message">
+            Pattern submitted successfully! Redirecting...
+        </div>
+        
+        <div class="message warning" id="warning-message"></div>
+        
+        <div class="message error" id="error-message"></div>
+        
+        <div class="message info" id="info-message"></div>
+
+        <!-- File Drop Zone -->
+        <div class="drop-zone" id="drop-zone">
+            <div class="drop-icon">📁</div>
+            <div class="drop-title">Drop your pattern file here</div>
+            <div class="drop-subtitle">
+                CLAUDE.md, agent.yaml, hook.sh, prompt.txt, or command.md
             </div>
-            
-            <div class="warning-message" id="warning-message">
-                ⚠️ Security Warning: Your pattern was submitted but contains potentially dangerous content. Please ensure it's safe before others use it.
-            </div>
-            
-            <div class="error-message" id="error-message">
-                Failed to submit pattern. Please try again.
-            </div>
-            
-            <form id="submit-form">
+            <input type="file" class="file-input" id="file-input" accept=".md,.yaml,.yml,.sh,.txt">
+            <button class="browse-btn" onclick="document.getElementById('file-input').click()">
+                Browse Files
+            </button>
+            <div class="or-divider">— or —</div>
+            <a class="paste-link" id="paste-toggle">Paste content manually</a>
+        </div>
+
+        <!-- Manual Entry (hidden by default) -->
+        <div class="manual-entry" id="manual-entry">
+            <div class="form-section active">
+                <div class="section-title">Manual Pattern Entry</div>
+                
                 <div class="form-group">
                     <label>Pattern Type <span class="required">*</span></label>
                     <div class="type-selector">
@@ -347,70 +569,364 @@
                             <div class="type-desc">CLI commands</div>
                         </div>
                     </div>
-                    <input type="hidden" name="type" id="type" required>
                 </div>
                 
                 <div class="form-group">
+                    <label for="manual-content">Pattern Content <span class="required">*</span></label>
+                    <textarea id="manual-content" style="font-family: 'Monaco', 'Courier New', monospace; font-size: 13px; min-height: 300px;" placeholder="Paste your pattern content here..."></textarea>
+                    <div class="char-counter" id="manual-char-counter">0 / 10240 characters</div>
+                </div>
+                
+                <button class="btn btn-primary" id="manual-continue">Continue with this content</button>
+                <button class="btn btn-secondary" id="back-to-upload">Back to file upload</button>
+            </div>
+        </div>
+
+        <!-- Metadata Form (hidden initially) -->
+        <div class="form-section" id="metadata-form">
+            <div class="section-title">Complete Pattern Details</div>
+            
+            <div class="form-group">
+                <label>Pattern Preview</label>
+                <div class="code-preview" id="content-preview"></div>
+                <div class="help-text">This is what will be stored as your pattern</div>
+            </div>
+            
+            <form id="submit-form">
+                <input type="hidden" id="type" name="type">
+                <input type="hidden" id="content" name="content">
+                
+                <div class="form-group">
                     <label for="title">Title <span class="required">*</span></label>
-                    <input type="text" id="title" name="title" maxlength="100" required placeholder="e.g., Parallel-Safe Analysis Pattern">
+                    <input type="text" id="title" name="title" maxlength="200" required placeholder="e.g., Parallel-Safe Analysis Pattern">
+                    <div class="help-text">A clear, descriptive title for your pattern</div>
                 </div>
                 
                 <div class="form-group">
                     <label for="description">Description <span class="required">*</span></label>
-                    <textarea id="description" name="description" maxlength="300" required placeholder="Brief description of what this pattern does and when to use it"></textarea>
-                    <div class="help-text">Explain the problem this pattern solves</div>
+                    <textarea id="description" name="description" maxlength="500" required placeholder="Brief description of what this pattern does and when to use it"></textarea>
+                    <div class="help-text">Explain the problem this pattern solves and when to use it</div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="content">Pattern Content <span class="required">*</span></label>
-                    <textarea id="content" name="content" class="code-input" required placeholder="Paste your pattern content here..."></textarea>
-                    <div class="char-counter" id="char-counter">0 / 10240 characters</div>
-                    <div class="help-text" id="content-help">Maximum size varies by type</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="tags-input">Tags</label>
+                    <label for="tags-input">Tags <span class="required">*</span></label>
                     <div class="tags-input" id="tags-container">
-                        <input type="text" class="tag-input-field" id="tags-input" placeholder="Type and press Enter">
+                        <input type="text" class="tag-input-field" id="tags-input" placeholder="Type to search tags..." autocomplete="off">
                     </div>
-                    <div class="help-text">Add up to 5 tags (e.g., python, testing, safety)</div>
+                    <div class="tag-suggestions" id="tag-suggestions" style="display: none;"></div>
+                    <div class="help-text">Add 1-5 tags to help others find your pattern (required)</div>
+                    <div class="help-text" style="color: #d32f2f; display: none;" id="tags-error">At least one tag is required</div>
                 </div>
                 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Submit Pattern</button>
-                    <a href="/" class="btn btn-secondary">Cancel</a>
+                    <button type="button" class="btn btn-secondary" id="start-over">Start Over</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        // State
         let selectedType = '';
+        let fileContent = '';
+        let fileName = '';
         const tags = [];
         const limits = {
-            claude_md: 10240,
-            agent: 5120,
-            prompt: 500,
-            hook: 5120,
-            command: 2048
+            claude_md: 50000,
+            agent: 10000,
+            prompt: 2000,
+            hook: 10000,
+            command: 5000
         };
         
-        // Type selection
+        // Curated tags list for autocomplete
+        const availableTags = [
+            'actix', 'advanced', 'ai', 'alpine', 'analysis', 'angular', 'ansible', 'apache', 'api', 'arangodb',
+            'automation', 'aws', 'axum', 'azure', 'backup', 'bash', 'beginner', 'c', 'caching', 'caddy',
+            'cassandra', 'chef', 'circleci', 'cli', 'clojure', 'cloudflare', 'codeigniter', 'cpp', 'csharp', 'css',
+            'dart', 'datadog', 'debugging', 'deployment', 'desktop', 'django', 'docker', 'documentation', 'dynamodb', 'echo',
+            'elasticsearch', 'elixir', 'experimental', 'express', 'fastapi', 'flask', 'fsharp', 'fullstack', 'gatsby', 'gcp',
+            'gin', 'github-actions', 'gitlab-ci', 'go', 'grafana', 'hapi', 'haskell', 'helm', 'html', 'htmx',
+            'influxdb', 'intermediate', 'java', 'javascript', 'jenkins', 'jquery', 'koa', 'kotlin', 'kubernetes', 'laravel',
+            'lit', 'logging', 'lua', 'matlab', 'migration', 'ml', 'mobile', 'mongodb', 'monitoring', 'mysql',
+            'neo4j', 'nestjs', 'netlify', 'newrelic', 'nextjs', 'nginx', 'nuxt', 'objectivec', 'oracle', 'performance',
+            'perl', 'php', 'podman', 'postgresql', 'powershell', 'production-ready', 'prometheus', 'puppet', 'pyramid', 'python',
+            'quarkus', 'quasar', 'r', 'rails', 'react', 'redis', 'refactoring', 'remix', 'ruby', 'rust',
+            's3', 'safe', 'scala', 'security', 'shell', 'sinatra', 'solid', 'spring', 'springboot', 'sql',
+            'sqlite', 'sqlserver', 'svelte', 'sveltekit', 'swift', 'symfony', 'terraform', 'testing', 'timescaledb', 'typescript',
+            'validation', 'vercel', 'vue', 'web', 'zig'
+        ];
+
+        // File type detection
+        function detectType(filename, content) {
+            const ext = filename.split('.').pop().toLowerCase();
+            
+            // Extension-based detection
+            if (filename.toLowerCase().includes('claude.md')) return 'claude_md';
+            if (ext === 'yaml' || ext === 'yml') return 'agent';
+            if (ext === 'sh') return 'hook';
+            if (filename.toLowerCase().includes('command')) return 'command';
+            if (ext === 'txt' && content.length < 1000) return 'prompt';
+            
+            // Content-based detection
+            if (content.startsWith('name:') || content.includes('\nname:')) return 'agent';
+            if (content.startsWith('#!/bin/') || content.includes('exit ')) return 'hook';
+            if (content.includes('$ARGUMENTS') || content.includes('allowed-tools:')) return 'command';
+            if (content.length < 500 && !content.includes('\n#')) return 'prompt';
+            
+            // Default to CLAUDE.md for markdown files
+            if (ext === 'md') return 'claude_md';
+            
+            return null;
+        }
+
+        // Extract metadata from content
+        // Auto-suggest tags based on content
+        function autoSuggestTags(content, type, filename) {
+            const suggested = new Set();
+            const lowerContent = content.toLowerCase();
+            const lowerFilename = filename.toLowerCase();
+            
+            // Type-based suggestions
+            const typeTagMap = {
+                'hook': ['bash', 'automation', 'cli'],
+                'agent': ['automation', 'ai'],
+                'prompt': ['ai'],
+                'command': ['cli', 'automation'],
+                'claude_md': ['documentation']
+            };
+            
+            if (typeTagMap[type]) {
+                typeTagMap[type].forEach(tag => suggested.add(tag));
+            }
+            
+            // Language detection
+            const languagePatterns = [
+                { pattern: /\.py|python|import\s+\w+|def\s+\w+/i, tags: ['python'] },
+                { pattern: /\.js|javascript|const\s+\w+|function\s+\w+|=>/, tags: ['javascript'] },
+                { pattern: /\.ts|typescript|interface\s+\w+|type\s+\w+/, tags: ['typescript'] },
+                { pattern: /\.rs|rust|fn\s+\w+|impl\s+|trait\s+/, tags: ['rust'] },
+                { pattern: /\.go|golang|func\s+\w+|package\s+\w+/, tags: ['go'] },
+                { pattern: /\.rb|ruby|def\s+\w+|class\s+\w+/, tags: ['ruby'] },
+                { pattern: /\.java|public\s+class|private\s+void/, tags: ['java'] },
+                { pattern: /\.sh|#!/i, tags: ['bash', 'shell'] },
+                { pattern: /react|useState|useEffect/, tags: ['react'] },
+                { pattern: /vue|v-if|v-for/, tags: ['vue'] },
+                { pattern: /angular|@Component|@Injectable/, tags: ['angular'] },
+                { pattern: /docker|dockerfile|container/, tags: ['docker'] },
+                { pattern: /kubernetes|kubectl|k8s/, tags: ['kubernetes'] },
+                { pattern: /aws|amazon|s3|ec2|lambda/, tags: ['aws'] },
+                { pattern: /test|spec|describe\(|it\(|expect/, tags: ['testing'] },
+                { pattern: /security|auth|encrypt|token/, tags: ['security'] },
+                { pattern: /api|rest|graphql|endpoint/, tags: ['api'] },
+                { pattern: /database|sql|mongo|redis/, tags: ['database'] }
+            ];
+            
+            languagePatterns.forEach(({ pattern, tags: patternTags }) => {
+                if (pattern.test(lowerContent) || pattern.test(lowerFilename)) {
+                    patternTags.forEach(tag => {
+                        if (availableTags.includes(tag)) {
+                            suggested.add(tag);
+                        }
+                    });
+                }
+            });
+            
+            // Limit to 3 suggestions
+            return Array.from(suggested).slice(0, 3);
+        }
+        
+        function extractMetadata(content, type, filename) {
+            const metadata = {
+                title: '',
+                description: '',
+                tags: []
+            };
+            
+            // Extract title from filename
+            const baseName = filename.replace(/\.[^/.]+$/, '');
+            metadata.title = baseName
+                .replace(/[-_]/g, ' ')
+                .replace(/\b\w/g, l => l.toUpperCase())
+                .replace(/Claude Md/gi, 'CLAUDE.md');
+            
+            // Type-specific extraction
+            if (type === 'agent') {
+                // Try to extract from YAML
+                const nameMatch = content.match(/^name:\s*(.+)$/m);
+                const descMatch = content.match(/^description:\s*(.+)$/m);
+                if (nameMatch) metadata.title = nameMatch[1].trim();
+                if (descMatch) metadata.description = descMatch[1].trim();
+            } else if (type === 'claude_md') {
+                // Extract first heading as potential title
+                const headingMatch = content.match(/^#\s+(.+)$/m);
+                if (headingMatch) metadata.title = headingMatch[1].trim();
+            } else if (type === 'hook') {
+                // Look for comments at the top
+                const commentMatch = content.match(/^#\s*(.+)$/m);
+                if (commentMatch && !commentMatch[1].startsWith('!')) {
+                    metadata.description = commentMatch[1].trim();
+                }
+            }
+            
+            return metadata;
+        }
+
+        // Drop zone handling
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        // File handling
+        async function handleFile(file) {
+            // Check file size
+            if (file.size > 100000) {
+                showMessage('error', 'File is too large. Maximum size is 100KB.');
+                return;
+            }
+            
+            fileName = file.name;
+            
+            try {
+                fileContent = await file.text();
+                
+                // Detect type
+                selectedType = detectType(fileName, fileContent);
+                
+                if (!selectedType) {
+                    showMessage('warning', 'Could not detect pattern type. Please select manually.');
+                    // Show manual type selector
+                    showManualEntry();
+                    document.getElementById('manual-content').value = fileContent;
+                    updateManualCharCounter();
+                    return;
+                }
+                
+                // Check content limits
+                if (fileContent.length > limits[selectedType]) {
+                    showMessage('error', `Content exceeds maximum length for ${selectedType} (${limits[selectedType]} characters)`);
+                    return;
+                }
+                
+                // Extract metadata
+                const metadata = extractMetadata(fileContent, selectedType, fileName);
+                
+                // Update UI
+                showFilePreview(file, selectedType);
+                showMetadataForm(metadata);
+                
+            } catch (error) {
+                showMessage('error', 'Failed to read file. Please try again.');
+                console.error(error);
+            }
+        }
+        
+        // Show file preview
+        function showFilePreview(file, type) {
+            const typeNames = {
+                claude_md: 'CLAUDE.md',
+                agent: 'Agent',
+                prompt: 'Prompt',
+                hook: 'Hook',
+                command: 'Command'
+            };
+            
+            dropZone.classList.add('has-file');
+            dropZone.innerHTML = `
+                <div class="file-preview">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                        <div class="file-name">
+                            ${file.name}
+                            <span class="file-type-badge">${typeNames[type]}</span>
+                        </div>
+                        <div class="file-details">
+                            ${(file.size / 1024).toFixed(1)} KB • ${fileContent.split('\n').length} lines
+                        </div>
+                    </div>
+                    <div class="remove-file" onclick="startOver()">×</div>
+                </div>
+            `;
+        }
+        
+        // Show metadata form
+        function showMetadataForm(metadata) {
+            document.getElementById('type').value = selectedType;
+            document.getElementById('content').value = fileContent;
+            document.getElementById('title').value = metadata.title;
+            document.getElementById('description').value = metadata.description;
+            
+            // Show content preview
+            const preview = fileContent.substring(0, 500);
+            document.getElementById('content-preview').textContent = 
+                preview + (fileContent.length > 500 ? '\n...\n[truncated]' : '');
+            
+            // Auto-suggest tags based on content and type
+            const suggestedTags = autoSuggestTags(fileContent, selectedType, fileName);
+            suggestedTags.forEach(tag => {
+                if (availableTags.includes(tag) && !tags.includes(tag)) {
+                    addTag(tag);
+                }
+            });
+            
+            // Show form
+            document.getElementById('metadata-form').classList.add('active');
+        }
+        
+        // Manual entry toggle
+        document.getElementById('paste-toggle').addEventListener('click', () => {
+            showManualEntry();
+        });
+        
+        function showManualEntry() {
+            dropZone.style.display = 'none';
+            document.getElementById('manual-entry').classList.add('active');
+        }
+        
+        document.getElementById('back-to-upload').addEventListener('click', () => {
+            dropZone.style.display = 'block';
+            document.getElementById('manual-entry').classList.remove('active');
+        });
+        
+        // Manual type selection
         document.querySelectorAll('.type-option').forEach(option => {
             option.addEventListener('click', () => {
                 document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
                 selectedType = option.dataset.type;
-                document.getElementById('type').value = selectedType;
-                updateCharCounter();
-                updateContentHelp();
+                updateManualCharCounter();
             });
         });
         
-        // Character counter
-        function updateCharCounter() {
-            const content = document.getElementById('content').value;
-            const counter = document.getElementById('char-counter');
+        // Manual content character counter
+        function updateManualCharCounter() {
+            const content = document.getElementById('manual-content').value;
+            const counter = document.getElementById('manual-char-counter');
             const limit = selectedType ? limits[selectedType] : 10240;
             const length = content.length;
             
@@ -427,31 +943,215 @@
             }
         }
         
-        function updateContentHelp() {
-            const help = document.getElementById('content-help');
-            if (selectedType) {
-                help.textContent = `Maximum ${limits[selectedType]} characters for ${selectedType.replace('_', ' ')}`;
+        document.getElementById('manual-content').addEventListener('input', updateManualCharCounter);
+        
+        // Manual continue button
+        document.getElementById('manual-continue').addEventListener('click', () => {
+            if (!selectedType) {
+                showMessage('error', 'Please select a pattern type');
+                return;
             }
-        }
+            
+            fileContent = document.getElementById('manual-content').value;
+            
+            if (!fileContent.trim()) {
+                showMessage('error', 'Please enter some content');
+                return;
+            }
+            
+            if (fileContent.length > limits[selectedType]) {
+                showMessage('error', `Content exceeds maximum length for ${selectedType}`);
+                return;
+            }
+            
+            // Extract metadata and show form
+            const metadata = extractMetadata(fileContent, selectedType, `pattern.${selectedType}`);
+            document.getElementById('manual-entry').classList.remove('active');
+            showMetadataForm(metadata);
+            
+            // Focus on title if empty, otherwise description
+            setTimeout(() => {
+                if (!metadata.title) {
+                    document.getElementById('title').focus();
+                } else if (!metadata.description) {
+                    document.getElementById('description').focus();
+                } else {
+                    document.getElementById('tags-input').focus();
+                }
+            }, 100);
+        });
         
-        document.getElementById('content').addEventListener('input', updateCharCounter);
-        
-        // Tags handling
+        // Tags handling with autocomplete
         const tagsInput = document.getElementById('tags-input');
         const tagsContainer = document.getElementById('tags-container');
+        const tagSuggestions = document.getElementById('tag-suggestions');
+        let selectedSuggestionIndex = -1;
         
+        // Show suggestions on input
+        tagsInput.addEventListener('input', (e) => {
+            const value = e.target.value.trim().toLowerCase();
+            if (value.length > 0) {
+                showTagSuggestions(value);
+            } else {
+                hideTagSuggestions();
+            }
+        });
+        
+        // Handle keyboard navigation
         tagsInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ',') {
+            const suggestions = tagSuggestions.querySelectorAll('.tag-suggestion:not(.disabled)');
+            
+            if (e.key === 'ArrowDown') {
                 e.preventDefault();
+                selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
+                updateSelectedSuggestion();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                updateSelectedSuggestion();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
+                    const tag = suggestions[selectedSuggestionIndex].dataset.tag;
+                    if (tag && !tags.includes(tag) && tags.length < 5) {
+                        addTag(tag);
+                        tagsInput.value = '';
+                        hideTagSuggestions();
+                    }
+                } else {
+                    // Try to add exact match if it exists
+                    const value = tagsInput.value.trim().toLowerCase();
+                    if (value && availableTags.includes(value) && !tags.includes(value) && tags.length < 5) {
+                        addTag(value);
+                        tagsInput.value = '';
+                        hideTagSuggestions();
+                    }
+                }
+            } else if (e.key === 'Escape') {
+                hideTagSuggestions();
+            } else if (e.key === ',' || e.key === 'Tab') {
+                if (e.key === ',') e.preventDefault();
                 const value = tagsInput.value.trim().toLowerCase();
-                if (value && tags.length < 5 && !tags.includes(value)) {
+                if (value && availableTags.includes(value) && !tags.includes(value) && tags.length < 5) {
                     addTag(value);
                     tagsInput.value = '';
+                    hideTagSuggestions();
                 }
             }
         });
         
+        // Show tag suggestions with lookahead highlighting
+        function showTagSuggestions(query) {
+            // Score and filter tags based on relevance
+            const scored = availableTags
+                .filter(tag => !tags.includes(tag))
+                .map(tag => {
+                    const lowerTag = tag.toLowerCase();
+                    const lowerQuery = query.toLowerCase();
+                    let score = 0;
+                    
+                    // Exact match
+                    if (lowerTag === lowerQuery) score = 1000;
+                    // Starts with query
+                    else if (lowerTag.startsWith(lowerQuery)) score = 100;
+                    // Contains query
+                    else if (lowerTag.includes(lowerQuery)) score = 10;
+                    // Fuzzy match (each character in order)
+                    else {
+                        let queryIndex = 0;
+                        for (let i = 0; i < lowerTag.length && queryIndex < lowerQuery.length; i++) {
+                            if (lowerTag[i] === lowerQuery[queryIndex]) {
+                                queryIndex++;
+                                score += 1;
+                            }
+                        }
+                        if (queryIndex !== lowerQuery.length) score = 0;
+                    }
+                    
+                    return { tag, score };
+                })
+                .filter(item => item.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10);
+            
+            if (scored.length === 0) {
+                tagSuggestions.innerHTML = '<div class="tag-suggestion disabled">No matching tags found</div>';
+            } else {
+                tagSuggestions.innerHTML = scored.map((item, index) => {
+                    const { tag } = item;
+                    // Highlight matching characters
+                    const highlighted = highlightMatch(tag, query);
+                    
+                    return `<div class="tag-suggestion" data-tag="${tag}" data-index="${index}">
+                        ${highlighted}
+                        ${tags.length >= 5 ? '<small>(max 5 tags)</small>' : ''}
+                    </div>`;
+                }).join('');
+                
+                // Add click handlers
+                tagSuggestions.querySelectorAll('.tag-suggestion:not(.disabled)').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const tag = el.dataset.tag;
+                        if (tag && !tags.includes(tag) && tags.length < 5) {
+                            addTag(tag);
+                            tagsInput.value = '';
+                            hideTagSuggestions();
+                        }
+                    });
+                });
+            }
+            
+            tagSuggestions.style.display = 'block';
+            selectedSuggestionIndex = -1;
+        }
+        
+        // Highlight matching characters in tag
+        function highlightMatch(tag, query) {
+            const lowerTag = tag.toLowerCase();
+            const lowerQuery = query.toLowerCase();
+            let result = '';
+            let queryIndex = 0;
+            
+            for (let i = 0; i < tag.length; i++) {
+                if (queryIndex < lowerQuery.length && lowerTag[i] === lowerQuery[queryIndex]) {
+                    result += `<strong>${tag[i]}</strong>`;
+                    queryIndex++;
+                } else {
+                    result += tag[i];
+                }
+            }
+            
+            return result;
+        }
+        
+        // Hide tag suggestions
+        function hideTagSuggestions() {
+            tagSuggestions.style.display = 'none';
+            selectedSuggestionIndex = -1;
+        }
+        
+        // Update selected suggestion
+        function updateSelectedSuggestion() {
+            const suggestions = tagSuggestions.querySelectorAll('.tag-suggestion');
+            suggestions.forEach((el, index) => {
+                el.classList.toggle('selected', index === selectedSuggestionIndex);
+            });
+        }
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!tagsContainer.contains(e.target) && !tagSuggestions.contains(e.target)) {
+                hideTagSuggestions();
+            }
+        });
+        
         function addTag(tag) {
+            if (tags.includes(tag)) return;
+            if (!availableTags.includes(tag)) {
+                showMessage('error', `"${tag}" is not a valid tag. Please select from the suggestions.`);
+                return;
+            }
+            
             tags.push(tag);
             const chip = document.createElement('div');
             chip.className = 'tag-chip';
@@ -461,7 +1161,19 @@
             chip.querySelector('.remove').addEventListener('click', () => {
                 removeTag(tag);
                 chip.remove();
+                updateTagsError();
             });
+            
+            updateTagsError();
+        }
+        
+        function updateTagsError() {
+            const errorEl = document.getElementById('tags-error');
+            if (tags.length === 0) {
+                errorEl.style.display = 'block';
+            } else {
+                errorEl.style.display = 'none';
+            }
         }
         
         function removeTag(tag) {
@@ -471,21 +1183,46 @@
             }
         }
         
+        // Description sanitization
+        function sanitizeDescription(text) {
+            // Remove any HTML/script tags
+            text = text.replace(/<[^>]*>/g, '');
+            // Remove excessive whitespace
+            text = text.replace(/\s+/g, ' ').trim();
+            // Limit consecutive special characters
+            text = text.replace(/([!?.]){3,}/g, '$1$1');
+            // Remove potentially malicious patterns
+            text = text.replace(/javascript:/gi, '');
+            text = text.replace(/on\w+\s*=/gi, '');
+            return text;
+        }
+        
         // Form submission
         document.getElementById('submit-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            if (!selectedType) {
-                alert('Please select a pattern type');
+            // Validate required fields
+            if (tags.length === 0) {
+                showMessage('error', 'Please add at least one tag');
+                document.getElementById('tags-error').style.display = 'block';
                 return;
             }
             
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('description').value;
-            const content = document.getElementById('content').value;
+            const title = document.getElementById('title').value.trim();
+            const description = sanitizeDescription(document.getElementById('description').value);
             
-            if (content.length > limits[selectedType]) {
-                alert(`Content exceeds maximum length for ${selectedType}`);
+            if (!title) {
+                showMessage('error', 'Title is required');
+                return;
+            }
+            
+            if (!description || description.length < 10) {
+                showMessage('error', 'Please provide a meaningful description (at least 10 characters)');
+                return;
+            }
+            
+            if (!fileContent || fileContent.trim().length === 0) {
+                showMessage('error', 'Pattern content is required');
                 return;
             }
             
@@ -497,7 +1234,7 @@
                         type: selectedType,
                         title,
                         description,
-                        content,
+                        content: fileContent,
                         tags
                     })
                 });
@@ -505,63 +1242,119 @@
                 if (response.ok) {
                     const data = await response.json();
                     
-                    // Handle security warnings
                     if (data.warning) {
-                        document.getElementById('warning-message').innerHTML = 
-                            `⚠️ Security Warning: ${data.warning}<br><small>Your pattern was still submitted but may require user caution.</small>`;
-                        document.getElementById('warning-message').style.display = 'block';
-                    } else {
-                        document.getElementById('warning-message').style.display = 'none';
+                        showMessage('warning', `⚠️ Security Warning: ${data.warning}`);
                     }
                     
-                    document.getElementById('success-message').style.display = 'block';
-                    document.getElementById('error-message').style.display = 'none';
+                    showMessage('success', 'Pattern submitted successfully! Redirecting...');
                     
                     setTimeout(() => {
                         window.location.href = `/pattern/${data.id}`;
-                    }, data.warning ? 4000 : 2000); // Longer delay if there's a warning
+                    }, data.warning ? 3000 : 1500);
+                    
                 } else if (response.status === 409) {
                     const data = await response.json();
-                    alert(`This pattern already exists. View it at /pattern/${data.existing_id}`);
+                    showMessage('error', `This pattern already exists. <a href="/pattern/${data.existing_id}" style="color: white; text-decoration: underline;">View existing pattern</a>`);
                 } else {
                     const error = await response.json();
-                    let errorMessage = error.error || 'Failed to submit pattern';
+                    let msg = error.error || 'Failed to submit pattern';
                     
-                    // Provide helpful suggestions based on error type
-                    if (error.validation_type === 'structure') {
-                        errorMessage += '<br><br><strong>💡 Suggestions:</strong><br>';
-                        
-                        if (errorMessage.includes('YAML')) {
-                            errorMessage += '• Check your YAML syntax at <a href="https://yamlchecker.com" target="_blank">yamlchecker.com</a><br>';
-                            errorMessage += '• Ensure you have "name:" and "description:" fields<br>';
-                            errorMessage += '• Use spaces, not tabs for indentation';
-                        } else if (errorMessage.includes('shell') || errorMessage.includes('syntax')) {
-                            errorMessage += '• Check for unmatched quotes or brackets<br>';
-                            errorMessage += '• Add shebang line: #!/bin/bash<br>';
-                            errorMessage += '• Use "exit 0" for success, "exit 2" to block operations';
-                        } else if (errorMessage.includes('too short')) {
-                            errorMessage += '• Make your content more descriptive<br>';
-                            errorMessage += '• Add specific details about what it does<br>';
-                            errorMessage += '• Include usage examples or context';
-                        }
-                    } else if (error.blocked) {
-                        errorMessage += '<br><br><strong>🚫 Content Policy:</strong><br>';
-                        errorMessage += 'Your submission was blocked to protect users. Consider:<br>';
-                        errorMessage += '• Remove promotional language<br>';
-                        errorMessage += '• Focus on educational content<br>';
-                        errorMessage += '• Avoid suspicious links or requests';
-                    } else if (error.field) {
-                        errorMessage += `<br><br><strong>📍 Issue with field:</strong> ${error.field}`;
+                    if (error.blocked) {
+                        msg = '🚫 ' + msg;
                     }
                     
-                    document.getElementById('error-message').innerHTML = errorMessage;
-                    document.getElementById('error-message').style.display = 'block';
+                    showMessage('error', msg);
                 }
             } catch (error) {
                 console.error('Submit failed:', error);
-                document.getElementById('error-message').style.display = 'block';
+                showMessage('error', 'Network error. Please try again.');
             }
         });
+        
+        // Start over button
+        document.getElementById('start-over').addEventListener('click', startOver);
+        
+        function startOver() {
+            dropZone.classList.remove('has-file');
+            dropZone.innerHTML = `
+                <div class="drop-icon">📁</div>
+                <div class="drop-title">Drop your pattern file here</div>
+                <div class="drop-subtitle">
+                    CLAUDE.md, agent.yaml, hook.sh, prompt.txt, or command.md
+                </div>
+                <input type="file" class="file-input" id="file-input" accept=".md,.yaml,.yml,.sh,.txt">
+                <button class="browse-btn" onclick="document.getElementById('file-input').click()">
+                    Browse Files
+                </button>
+                <div class="or-divider">— or —</div>
+                <a class="paste-link" id="paste-toggle">Paste content manually</a>
+            `;
+            
+            dropZone.style.display = 'block';
+            document.getElementById('manual-entry').classList.remove('active');
+            document.getElementById('metadata-form').classList.remove('active');
+            
+            // Reset form
+            document.getElementById('submit-form').reset();
+            selectedType = '';
+            fileContent = '';
+            fileName = '';
+            tags.length = 0;
+            document.querySelectorAll('.tag-chip').forEach(chip => chip.remove());
+            
+            // Re-attach event listeners
+            document.getElementById('file-input').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+            
+            document.getElementById('paste-toggle').addEventListener('click', () => {
+                showManualEntry();
+            });
+        }
+        
+        // Message display
+        function showMessage(type, text) {
+            // Hide all messages
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.style.display = 'none';
+            });
+            
+            // Show specific message
+            const msgEl = document.getElementById(`${type}-message`);
+            if (msgEl) {
+                msgEl.innerHTML = text;
+                msgEl.style.display = 'block';
+                
+                // Auto-hide after delay (except errors)
+                if (type !== 'error') {
+                    setTimeout(() => {
+                        msgEl.style.display = 'none';
+                    }, 5000);
+                }
+            }
+        }
+        
+        // Check authentication on load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/user');
+                if (!response.ok) {
+                    // Not authenticated, show login message
+                    document.getElementById('auth-required').style.display = 'block';
+                    document.querySelector('.container').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                // Show login message on error
+                document.getElementById('auth-required').style.display = 'block';
+                document.querySelector('.container').style.display = 'none';
+            }
+        }
+        
+        // Check auth on page load
+        checkAuth();
     </script>
 </body>
 </html>

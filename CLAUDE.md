@@ -38,6 +38,8 @@ Building a minimalist pattern repository for Claude Code best practices at clodo
 - [x] All error handling fixed (vote endpoint 500 → 401)
 - [x] Enhanced validation system for instructional content security
 - [x] Cloudflare Workers GitHub app installed and configured
+- [x] Auto-deployment via Git integration working
+- [x] Client-side filtering with instant UX (no refresh)
 
 ## Development Commands
 ```bash
@@ -56,9 +58,12 @@ wrangler tail            # View production logs
 ## Key Learnings (2025)
 - **Workers over Pages**: Cloudflare recommends Workers for new projects
 - **Custom Domains**: Automatically handles DNS setup (no manual A records)
-- **Git Integration**: Workers Builds enables auto-deploy on push
+- **Git Integration**: Workers Builds enables auto-deploy on push (install GitHub app first!)
 - **Playwright MCP**: Added via `claude mcp add playwright`
 - **Auth Design**: Keep extensible for multiple providers, not just GitHub
+- **Validation**: 3-tier system (BLOCK/WARN/ALLOW) for both code and instructions
+- **Tag System**: Curated tags prevent typos and trolling vs user-submitted
+- **UX**: Client-side filtering > server-side for instant response
 
 ## Documentation
 - **DEPLOYMENT-2025.md**: Step-by-step deployment guide

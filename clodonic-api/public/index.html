@@ -36,6 +36,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 20px;
         }
         
         .logo {
@@ -65,6 +66,112 @@
         .type-nav {
             display: flex;
             gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        /* Auth Section */
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .auth-btn {
+            padding: 8px 16px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .auth-btn:hover {
+            background: #333;
+        }
+        
+        .auth-btn.github {
+            background: #24292e;
+        }
+        
+        .auth-btn.github:hover {
+            background: #3a3f44;
+        }
+        
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .user-avatar:hover {
+            border-color: #ff6600;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .user-dropdown.active {
+            display: block;
+        }
+        
+        .user-info {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-email {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .dropdown-item {
+            padding: 10px 16px;
+            display: block;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .dropdown-item.danger {
+            color: #d32f2f;
         }
         
         .type-pill {
@@ -476,6 +583,10 @@
                     Commands <span class="count">0</span>
                 </a>
             </nav>
+            
+            <div class="auth-section" id="auth-section">
+                <!-- Will be populated by JavaScript -->
+            </div>
         </div>
     </header>
     
@@ -538,6 +649,7 @@
         let isLoading = false;
         let searchTimeout = null;
         let allPatterns = []; // Cache for client-side filtering
+        let currentUser = null;
         
         // Get URL params
         const params = new URLSearchParams(window.location.search);
@@ -885,10 +997,95 @@
             }
         }
         
+        // Check auth status
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    renderAuthSection();
+                } else {
+                    currentUser = null;
+                    renderAuthSection();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                currentUser = null;
+                renderAuthSection();
+            }
+        }
+        
+        // Render auth section
+        function renderAuthSection() {
+            const authSection = document.getElementById('auth-section');
+            
+            if (currentUser) {
+                authSection.innerHTML = `
+                    <div class="user-menu">
+                        <img class="user-avatar" 
+                             src="${currentUser.avatar_url || 'https://github.com/identicons/' + currentUser.id + '.png'}" 
+                             alt="${currentUser.name}" 
+                             onclick="toggleUserMenu()">
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-info">
+                                <div class="user-name">${currentUser.name}</div>
+                                <div class="user-email">${currentUser.username}@github</div>
+                            </div>
+                            <a href="/my-patterns" class="dropdown-item">My Patterns</a>
+                            <a href="/settings" class="dropdown-item">Settings</a>
+                            <div class="dropdown-item danger" onclick="logout()">Sign Out</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                authSection.innerHTML = `
+                    <a href="/api/auth/github" class="auth-btn github">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        Sign in with GitHub
+                    </a>
+                `;
+            }
+        }
+        
+        // Toggle user menu
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const userMenu = document.querySelector('.user-menu');
+            if (userMenu && !userMenu.contains(e.target)) {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('active');
+                }
+            }
+        });
+        
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                currentUser = null;
+                renderAuthSection();
+                // Reload to clear any user-specific data
+                window.location.reload();
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+        
         // Initialize
         updateActiveStates();
         loadAllPatterns();
         loadTags();
+        checkAuth();
         
         // Handle tag clicks
         document.addEventListener('click', (e) => {
