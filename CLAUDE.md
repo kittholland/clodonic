@@ -53,6 +53,9 @@ wrangler d1 execute clodonic-db --remote --file=schema.sql  # Prod DB
 # Deployment
 wrangler deploy          # Deploy to production
 wrangler tail            # View production logs
+
+# Playwright/Browser issues
+pkill -f Chrome          # If browser is already in use error
 ```
 
 ## Key Learnings (2025)
