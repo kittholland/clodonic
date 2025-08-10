@@ -30,9 +30,12 @@ Building a minimalist pattern repository for Claude Code best practices at clodo
 - [x] Domain registered and DNS configured (clodonic.ai)
 - [x] MVP complete with all core features
 - [x] GitHub OAuth implemented
-- [x] Database deployed to production
+- [x] Database deployed to production with sample data
 - [x] Worker deployed with Custom Domains
 - [x] Git repository at github.com/kittholland/clodonic
+- [x] Production logging and monitoring implemented
+- [x] Rate limiting (30 patterns/hr, 10 votes/min)
+- [x] All error handling fixed (vote endpoint 500 → 401)
 
 ## Development Commands
 ```bash
