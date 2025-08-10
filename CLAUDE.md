@@ -36,6 +36,8 @@ Building a minimalist pattern repository for Claude Code best practices at clodo
 - [x] Production logging and monitoring implemented
 - [x] Rate limiting (30 patterns/hr, 10 votes/min)
 - [x] All error handling fixed (vote endpoint 500 → 401)
+- [x] Enhanced validation system for instructional content security
+- [x] Cloudflare Workers GitHub app installed and configured
 
 ## Development Commands
 ```bash
