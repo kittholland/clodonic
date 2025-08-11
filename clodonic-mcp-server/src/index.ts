@@ -31,7 +31,7 @@ const ICONS: Record<PatternType, string> = {
 export class ClodonicMCP extends McpAgent {
 	server = new McpServer({
 		name: "Clodonic Pattern Repository",
-		version: "2.0.2",
+		version: "2.1.0",
 	});
 
 	private apiUrl = "https://clodonic.ai/api";
