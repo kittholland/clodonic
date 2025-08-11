@@ -398,7 +398,7 @@
                     <button class="copy-full-btn" onclick="copyFullCode()">
                         Copy Code
                     </button>
-                    <pre><code class="language-${getLanguageForType(pattern.type)}">${escapeHtml(pattern.content)}</code></pre>
+                    <pre><code class="language-${getLanguageForType(pattern.type)}">${DOMPurify.sanitize(pattern.content, {ALLOWED_TAGS: [], ALLOWED_ATTR: []})}</code></pre>
                 </div>
                 
                 ${pattern.tags && pattern.tags.length > 0 ? `

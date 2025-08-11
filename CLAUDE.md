@@ -66,8 +66,11 @@ wrangler tail                               # View production logs
 # MCP integration
 claude mcp add https://mcp.clodonic.ai      # Install MCP server in Claude Code
 
-# Playwright/Browser issues
-pkill -f Chrome          # If browser is already in use error
+# Playwright/Browser issues - DO NOT kill all Chrome processes!
+# If you get "browser is already in use" error:
+ps aux | grep "ms-playwright\|mcp-chrome" | grep -v grep  # Find ONLY Playwright processes
+# Look for the main Chrome process (not renderer/helper) with --user-data-dir=.../ms-playwright/mcp-chrome
+# Kill only that specific PID: kill <PID>
 ```
 
 ## Key Learnings (2025)
