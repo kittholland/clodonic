@@ -934,6 +934,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
     
+    <!-- DOMPurify for XSS protection -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+    
     <script>
         // State
         let currentSort = 'hot';
@@ -1193,18 +1196,18 @@
                 <div class="pattern-card" data-id="${pattern.id}">
                     <div class="pattern-header">
                         <a href="/pattern/${pattern.id}" class="pattern-title">
-                            ${pattern.title}${pattern.has_warnings ? '<span class="warning-badge" title="This pattern has validation warnings">⚠</span>' : ''}
+                            ${DOMPurify.sanitize(pattern.title)}${pattern.has_warnings ? '<span class="warning-badge" title="This pattern has validation warnings">⚠</span>' : ''}
                         </a>
                         <span class="pattern-type ${getTypeClass(pattern.type)}">${formatType(pattern.type)}</span>
                     </div>
                     
-                    <p class="pattern-description">${pattern.description}</p>
+                    <p class="pattern-description">${DOMPurify.sanitize(pattern.description)}</p>
                     
                     ${renderCodePreview(pattern.content, pattern.type, pattern.id)}
                     
                     <div class="pattern-tags">
                         ${(pattern.tags || []).map(tag => 
-                            `<a href="/?tag=${encodeURIComponent(tag)}" class="pattern-tag">#${tag}</a>`
+                            `<a href="/?tag=${encodeURIComponent(tag)}" class="pattern-tag">#${DOMPurify.sanitize(tag)}</a>`
                         ).join('')}
                     </div>
                     
@@ -1212,7 +1215,7 @@
                         <div class="pattern-stats">
                             <span>⬆ ${pattern.votes_up || 0}</span>
                             <span>📦 0 installs</span>
-                            <span>👤 ${pattern.submitter_name === 'clodonic-system' ? 'Clodonic Team' : (pattern.submitter_name || 'Anonymous')}</span>
+                            <span>👤 ${pattern.submitter_name === 'clodonic-system' ? 'Clodonic Team' : DOMPurify.sanitize(pattern.submitter_name || 'Anonymous')}</span>
                         </div>
                         <button class="vote-btn" onclick="votePattern(${pattern.id}, 1)">
                             ⬆ Vote

@@ -28,6 +28,30 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+// Security headers middleware (must be first to apply to all responses)
+app.use('*', async (c, next) => {
+  await next();
+  
+  // Add security headers to all responses
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('X-XSS-Protection', '1; mode=block');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Basic CSP - allows our own scripts plus CDN libraries
+  c.header('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+    "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self' data: https://cdnjs.cloudflare.com; " +
+    "connect-src 'self'; " +
+    "frame-ancestors 'none'; " +
+    "base-uri 'self'; " +
+    "form-action 'self' https://github.com"
+  );
+});
+
 // Middleware
 app.use('*', loggerMiddleware());
 app.use('*', cors());
@@ -635,7 +659,7 @@ app.get('/api/auth/github/callback', async (c) => {
       httpOnly: true,
       secure: true,
       sameSite: 'Lax',
-      maxAge: 86400 // 24 hours
+      maxAge: 2592000 // 30 days
     });
     
     logger.info('User authenticated successfully', { 
