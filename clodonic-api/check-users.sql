@@ -1,0 +1,1 @@
+SELECT COUNT(*) as user_count FROM users WHERE username != 'clodonic-system';
