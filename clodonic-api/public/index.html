@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clodonic - Claude Code Patterns</title>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -343,27 +345,56 @@
         }
         
         .pattern-preview {
-            background: #f8f8f8;
-            border-left: 3px solid #ff6600;
-            padding: 12px;
-            margin: 12px 0;
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 12px;
-            color: #333;
-            overflow: hidden;
-            max-height: 80px;
             position: relative;
-            white-space: pre-wrap;
+            background: #2d2d2d;
+            border-radius: 6px;
+            margin: 12px 0;
+            overflow: hidden;
+            border: 1px solid #444;
         }
         
-        .pattern-preview::after {
-            content: '';
+        .pattern-preview pre {
+            margin: 0;
+            padding: 12px;
+            overflow-x: auto;
+            max-height: 150px;
+            font-size: 12px;
+            line-height: 1.5;
+            background: transparent !important;
+        }
+        
+        .pattern-preview code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: transparent !important;
+        }
+        
+        .copy-btn {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: linear-gradient(transparent, #f8f8f8);
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .pattern-card:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .copy-btn.copied {
+            background: #4caf50;
+            border-color: #4caf50;
         }
         
         .pattern-footer {
@@ -720,10 +751,67 @@
             return type.replace('_', '-');
         }
         
+        // Get language for syntax highlighting based on type
+        function getLanguageForType(type) {
+            const languageMap = {
+                'claude_md': 'markdown',
+                'agent': 'yaml',
+                'prompt': 'markdown',
+                'hook': 'bash',
+                'command': 'bash'
+            };
+            return languageMap[type] || 'plaintext';
+        }
+        
+        // Render code preview with syntax highlighting
+        function renderCodePreview(content, type, id) {
+            if (!content) return '';
+            
+            const language = getLanguageForType(type);
+            const preview = content.substring(0, 300);
+            const truncated = content.length > 300;
+            
+            // Escape HTML for safe display
+            const escaped = preview.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            return `
+                <div class="pattern-preview">
+                    <button class="copy-btn" data-content-id="${id}" onclick="copyCode(event)">
+                        Copy
+                    </button>
+                    <pre><code class="language-${language}">${escaped}${truncated ? '\n\n// ...' : ''}</code></pre>
+                </div>
+            `;
+        }
+        
+        // Copy code to clipboard
+        function copyCode(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const btn = event.target;
+            const patternCard = btn.closest('.pattern-card');
+            const patternId = patternCard.dataset.id;
+            const pattern = allPatterns.find(p => p.id == patternId);
+            
+            if (pattern && pattern.content) {
+                navigator.clipboard.writeText(pattern.content).then(() => {
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+        }
+        
         // Render pattern card
         function renderPatternCard(item) {
-            const preview = item.content ? item.content.substring(0, 200) : '';
-            
             return `
                 <div class="pattern-card" data-id="${item.id}">
                     <div class="pattern-header">
@@ -736,7 +824,7 @@
                     
                     <p class="pattern-description">${item.description}</p>
                     
-                    ${preview ? `<div class="pattern-preview">${preview}</div>` : ''}
+                    ${renderCodePreview(item.content, item.type, item.id)}
                     
                     ${item.tags && item.tags.length > 0 ? `
                         <div class="tags">
@@ -760,7 +848,6 @@
                             <button class="action-btn vote-btn ${item.user_voted ? 'voted' : ''}" data-id="${item.id}">
                                 <span>⬆</span> Vote
                             </button>
-                            <button class="action-btn" onclick="copyPattern(${item.id})">Copy</button>
                         </div>
                     </div>
                 </div>
@@ -1117,5 +1204,43 @@
             </p>
         </div>
     </footer>
+    
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script>
+        // Handle dark mode based on system preferences
+        function updateTheme() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const lightTheme = document.getElementById('prism-theme-light');
+            const darkTheme = document.getElementById('prism-theme-dark');
+            
+            if (isDark) {
+                lightTheme.disabled = true;
+                darkTheme.disabled = false;
+            } else {
+                lightTheme.disabled = false;
+                darkTheme.disabled = true;
+            }
+        }
+        
+        // Update theme on load and when system preference changes
+        updateTheme();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+        
+        // Re-run Prism highlighting after dynamic content loads
+        const originalRenderPatterns = renderPatterns;
+        renderPatterns = function() {
+            originalRenderPatterns();
+            setTimeout(() => {
+                if (typeof Prism !== 'undefined') {
+                    Prism.highlightAll();
+                }
+            }, 100);
+        };
+    </script>
 </body>
 </html>

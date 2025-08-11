@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Test</title>
+</head>
+<body>
+    <h1>GitHub OAuth Test</h1>
+    <p>Click the link below to test GitHub OAuth directly:</p>
+    
+    <h2>Test 1: Direct GitHub OAuth URL</h2>
+    <a href="https://github.com/login/oauth/authorize?client_id=Ov23liUO6sGRTpUYx4kB&redirect_uri=https%3A%2F%2Fclodonic.ai%2Fapi%2Fauth%2Fgithub%2Fcallback&scope=read%3Auser+user%3Aemail&state=test123">
+        Test OAuth with encoded redirect_uri
+    </a>
+    
+    <h2>Test 2: Without scope</h2>
+    <a href="https://github.com/login/oauth/authorize?client_id=Ov23liUO6sGRTpUYx4kB&redirect_uri=https%3A%2F%2Fclodonic.ai%2Fapi%2Fauth%2Fgithub%2Fcallback&state=test456">
+        Test OAuth without scope
+    </a>
+    
+    <h2>Test 3: Without redirect_uri (use default)</h2>
+    <a href="https://github.com/login/oauth/authorize?client_id=Ov23liUO6sGRTpUYx4kB&scope=read%3Auser&state=test789">
+        Test OAuth without redirect_uri parameter
+    </a>
+    
+    <h2>Test 4: Our API endpoint</h2>
+    <a href="/api/auth/github">
+        Test via our API
+    </a>
+    
+    <hr>
+    <p>After clicking, note:</p>
+    <ul>
+        <li>Do you see GitHub's authorization page?</li>
+        <li>Or do you go straight to 404?</li>
+        <li>If you see the auth page and click "Authorize", what happens?</li>
+    </ul>
+</body>
+</html>

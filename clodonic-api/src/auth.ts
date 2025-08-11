@@ -1,103 +1,138 @@
 import { Context } from 'hono';
 import { getCookie } from 'hono/cookie';
+import { GitHub } from 'arctic';
 
-export interface User {
-  id: number;
-  provider_id: string;
-  username: string;
-  email?: string;
-  auth_provider: string;
-}
-
-export interface Session {
+// Session interface
+interface Session {
   userId: number;
   username: string;
   createdAt: number;
 }
 
-// Simple session store (in production, use KV or D1)
-const sessions = new Map<string, Session>();
-
-export function generateSessionId(): string {
-  return crypto.randomUUID();
-}
-
-export function createSession(userId: number, username: string): string {
-  const sessionId = generateSessionId();
-  sessions.set(sessionId, {
+// Create session in D1
+export async function createSession(
+  db: D1Database,
+  userId: number, 
+  username: string
+): Promise<string> {
+  const sessionId = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  
+  await db.prepare(
+    `INSERT INTO sessions (id, user_id, username, expires_at) 
+     VALUES (?, ?, ?, ?)`
+  ).bind(
+    sessionId,
     userId,
     username,
-    createdAt: Date.now()
-  });
+    expiresAt.toISOString()
+  ).run();
+  
   return sessionId;
 }
 
-export function getSession(sessionId: string): Session | null {
-  const session = sessions.get(sessionId);
+// Get session from D1
+export async function getSession(
+  db: D1Database,
+  sessionId: string
+): Promise<Session | null> {
+  const session = await db.prepare(
+    `SELECT user_id, username, created_at 
+     FROM sessions 
+     WHERE id = ? AND expires_at > datetime('now')`
+  ).bind(sessionId).first();
+  
   if (!session) return null;
   
-  // Check if session is expired (24 hours)
-  if (Date.now() - session.createdAt > 24 * 60 * 60 * 1000) {
-    sessions.delete(sessionId);
-    return null;
-  }
-  
-  return session;
+  return {
+    userId: session.user_id as number,
+    username: session.username as string,
+    createdAt: new Date(session.created_at as string).getTime()
+  };
 }
 
-export function deleteSession(sessionId: string): void {
-  sessions.delete(sessionId);
+// Delete session from D1
+export async function deleteSession(
+  db: D1Database,
+  sessionId: string
+): Promise<void> {
+  await db.prepare('DELETE FROM sessions WHERE id = ?')
+    .bind(sessionId)
+    .run();
 }
 
-export function getUserFromRequest(c: Context): Session | null {
+// Clean up expired sessions (call periodically)
+export async function cleanupSessions(db: D1Database): Promise<void> {
+  await db.prepare(
+    `DELETE FROM sessions WHERE expires_at <= datetime('now')`
+  ).run();
+}
+
+// Get user from request
+export async function getUserFromRequest(c: Context): Promise<Session | null> {
   const sessionId = c.req.header('X-Session-Id') || 
                    getCookie(c, 'session_id');
   
   if (!sessionId) return null;
-  return getSession(sessionId);
-}
-
-// GitHub OAuth configuration
-export function getGitHubAuthUrl(state: string, clientId: string, redirectUri: string): string {
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    scope: 'read:user user:email',
-    state
-  });
   
-  return `https://github.com/login/oauth/authorize?${params}`;
+  // Access D1 from context
+  const db = c.env.DB as D1Database;
+  return getSession(db, sessionId);
 }
 
-export async function exchangeGitHubCode(
-  code: string, 
+// Create GitHub OAuth client
+export function createGitHubClient(
   clientId: string, 
-  clientSecret: string
-): Promise<string> {
-  const response = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code
-    })
-  });
-  
-  const data = await response.json();
-  return data.access_token;
+  clientSecret: string,
+  redirectUri?: string
+): GitHub {
+  // GitHub requires redirect URI if multiple are configured
+  // Pass null if not provided to use the default
+  return new GitHub(clientId, clientSecret, redirectUri || null);
 }
 
+// Generate authorization URL
+export function getGitHubAuthUrl(
+  github: GitHub, 
+  state: string
+): string {
+  // Arctic handles redirect_uri internally when the GitHub client is created
+  const url = github.createAuthorizationURL(state, {
+    scopes: ["read:user", "user:email"]
+  });
+  
+  return url.toString();
+}
+
+// Exchange code for tokens
+export async function exchangeGitHubCode(
+  github: GitHub,
+  code: string
+): Promise<{ accessToken: string }> {
+  try {
+    const tokens = await github.validateAuthorizationCode(code);
+    // Arctic returns OAuth2Tokens object - accessToken() is a method!
+    const accessToken = tokens.accessToken();
+    return { accessToken };
+  } catch (error) {
+    console.error('GitHub token exchange failed:', error);
+    throw error;
+  }
+}
+
+// Get GitHub user
 export async function getGitHubUser(accessToken: string): Promise<any> {
   const response = await fetch('https://api.github.com/user', {
     headers: {
-      'Authorization': `token ${accessToken}`,
-      'Accept': 'application/json'
+      'Authorization': `Bearer ${accessToken}`,
+      'Accept': 'application/json',
+      'User-Agent': 'Clodonic-OAuth'
     }
   });
+  
+  if (!response.ok) {
+    throw new Error(`GitHub API error: ${response.status}`);
+  }
   
   return response.json();
 }

@@ -5,6 +5,7 @@ import { getCookie, setCookie } from 'hono/cookie';
 import { 
   createSession, 
   getUserFromRequest, 
+  createGitHubClient,
   getGitHubAuthUrl,
   exchangeGitHubCode,
   getGitHubUser,
@@ -35,6 +36,26 @@ app.use('/api/*', csrf());
 // Health check
 app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Debug endpoint to verify secrets are loaded (remove in production!)
+app.get('/api/debug/secrets', (c) => {
+  const hasClientId = !!c.env.GITHUB_CLIENT_ID;
+  const hasClientSecret = !!c.env.GITHUB_CLIENT_SECRET;
+  const clientIdLength = c.env.GITHUB_CLIENT_ID ? c.env.GITHUB_CLIENT_ID.length : 0;
+  const clientIdPrefix = c.env.GITHUB_CLIENT_ID ? c.env.GITHUB_CLIENT_ID.substring(0, 4) : 'none';
+  const clientIdFull = c.env.GITHUB_CLIENT_ID || 'none';
+  const hasWhitespace = c.env.GITHUB_CLIENT_ID ? c.env.GITHUB_CLIENT_ID !== c.env.GITHUB_CLIENT_ID.trim() : false;
+  
+  return c.json({ 
+    hasClientId,
+    hasClientSecret,
+    clientIdLength,
+    clientIdPrefix,
+    clientIdFull,
+    hasWhitespace,
+    siteUrl: c.env.SITE_URL 
+  });
 });
 
 // List items
@@ -196,7 +217,7 @@ app.post('/api/items',
   const { type, title, description, content, tags } = validation.data;
   
   // Get user from session if authenticated
-  const session = getUserFromRequest(c);
+  const session = await getUserFromRequest(c);
   const userId = session?.userId || null;
   
   try {
@@ -398,7 +419,7 @@ app.post('/api/items/:id/vote',
   const itemId = c.req.param('id');
   
   try {
-    const session = getUserFromRequest(c);
+    const session = await getUserFromRequest(c);
     const userId = session?.userId;
     
     if (!userId) {
@@ -484,8 +505,8 @@ app.get('/api/tags', async (c) => {
 });
 
 // Auth endpoints
-app.get('/api/auth/status', (c) => {
-  const session = getUserFromRequest(c);
+app.get('/api/auth/status', async (c) => {
+  const session = await getUserFromRequest(c);
   if (!session) {
     return c.json({ authenticated: false });
   }
@@ -497,11 +518,44 @@ app.get('/api/auth/status', (c) => {
   });
 });
 
-app.get('/auth/github', (c) => {
+app.get('/api/auth/user', async (c) => {
+  const session = await getUserFromRequest(c);
+  if (!session) {
+    return c.json({ error: 'Not authenticated' }, 401);
+  }
+  
+  // Get full user info from database
+  const user = await c.env.DB.prepare(
+    'SELECT id, username, email, avatar_url, display_name FROM users WHERE id = ?'
+  ).bind(session.userId).first();
+  
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404);
+  }
+  
+  return c.json({ 
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    avatar_url: user.avatar_url,
+    display_name: user.display_name,
+    // For frontend compatibility
+    name: user.display_name
+  });
+});
+
+app.get('/api/auth/github', (c) => {
   const state = crypto.randomUUID();
   const siteUrl = c.env.SITE_URL || 'http://localhost:8787';
-  const redirectUri = `${siteUrl}/auth/github/callback`;
-  const authUrl = getGitHubAuthUrl(state, c.env.GITHUB_CLIENT_ID, redirectUri);
+  const redirectUri = `${siteUrl}/api/auth/github/callback`;
+  
+  const github = createGitHubClient(
+    c.env.GITHUB_CLIENT_ID,
+    c.env.GITHUB_CLIENT_SECRET,
+    redirectUri
+  );
+  
+  const authUrl = getGitHubAuthUrl(github, state);
   
   // Store state in cookie for CSRF protection
   setCookie(c, 'oauth_state', state, {
@@ -514,7 +568,7 @@ app.get('/auth/github', (c) => {
   return c.redirect(authUrl);
 });
 
-app.get('/auth/github/callback', async (c) => {
+app.get('/api/auth/github/callback', async (c) => {
   const logger = getLogger(c);
   const code = c.req.query('code');
   const state = c.req.query('state');
@@ -532,11 +586,19 @@ app.get('/auth/github/callback', async (c) => {
   }
   
   try {
-    // Exchange code for access token
-    const accessToken = await exchangeGitHubCode(
-      code,
+    const siteUrl = c.env.SITE_URL || 'http://localhost:8787';
+    const redirectUri = `${siteUrl}/api/auth/github/callback`;
+    
+    const github = createGitHubClient(
       c.env.GITHUB_CLIENT_ID,
-      c.env.GITHUB_CLIENT_SECRET
+      c.env.GITHUB_CLIENT_SECRET,
+      redirectUri
+    );
+    
+    // Exchange code for access token
+    const { accessToken } = await exchangeGitHubCode(
+      github,
+      code
     );
     
     // Get user info from GitHub
@@ -548,27 +610,44 @@ app.get('/auth/github/callback', async (c) => {
     ).bind(String(githubUser.id), 'github').first();
     
     if (!user) {
-      // Create new user
+      // Create new user with GitHub profile info
       const result = await c.env.DB.prepare(
-        `INSERT INTO users (provider_id, username, email, auth_provider) 
-         VALUES (?, ?, ?, ?)`
+        `INSERT INTO users (provider_id, username, email, auth_provider, avatar_url, display_name) 
+         VALUES (?, ?, ?, ?, ?, ?)`
       ).bind(
         String(githubUser.id),
         githubUser.login,
         githubUser.email,
-        'github'
+        'github',
+        githubUser.avatar_url,
+        githubUser.name || githubUser.login
       ).run();
       
       user = {
         id: result.meta.last_row_id,
         username: githubUser.login,
         email: githubUser.email,
-        auth_provider: 'github'
+        auth_provider: 'github',
+        avatar_url: githubUser.avatar_url,
+        display_name: githubUser.name || githubUser.login
       };
+    } else {
+      // Update existing user's profile info
+      await c.env.DB.prepare(
+        `UPDATE users SET avatar_url = ?, display_name = ? WHERE id = ?`
+      ).bind(
+        githubUser.avatar_url,
+        githubUser.name || githubUser.login,
+        user.id
+      ).run();
+      
+      // Update user object with latest info
+      user.avatar_url = githubUser.avatar_url;
+      user.display_name = githubUser.name || githubUser.login;
     }
     
-    // Create session
-    const sessionId = createSession(user.id, user.username);
+    // Create session in D1
+    const sessionId = await createSession(c.env.DB, user.id as number, user.username as string);
     
     // Set session cookie
     setCookie(c, 'session_id', sessionId, {
@@ -591,10 +670,10 @@ app.get('/auth/github/callback', async (c) => {
   }
 });
 
-app.post('/api/auth/logout', (c) => {
+app.post('/api/auth/logout', async (c) => {
   const sessionId = getCookie(c, 'session_id');
   if (sessionId) {
-    deleteSession(sessionId);
+    await deleteSession(c.env.DB, sessionId);
   }
   
   setCookie(c, 'session_id', '', {

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Patterns - Clodonic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #e0e0e0;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --text-primary: #c9d1d9;
+                --text-secondary: #8b949e;
+                --border-color: #30363d;
+            }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 0;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        
+        .logo-bracket {
+            color: #ff6600;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn-primary {
+            background: #ff6600;
+            color: white;
+            border-color: #ff6600;
+        }
+        
+        .btn-primary:hover {
+            background: #e55500;
+        }
+        
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .btn-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #fee;
+        }
+        
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .user-avatar:hover {
+            border-color: #ff6600;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .user-dropdown.active {
+            display: block;
+        }
+        
+        .user-info {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-email {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 10px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .dropdown-item.active {
+            background: #fff3e0;
+            color: #ff6600;
+        }
+        
+        .dropdown-item.danger {
+            color: #dc3545;
+        }
+        
+        .patterns-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .patterns-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6600;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .pattern-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .pattern-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .pattern-title:hover {
+            color: #ff6600;
+        }
+        
+        .pattern-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .pattern-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .pattern-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pattern-stats {
+            display: flex;
+            gap: 15px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .pattern-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        .empty-state h2 {
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #dc3545;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="/" class="logo">
+                <span class="logo-bracket">&lt;</span>clodonic<span class="logo-bracket">/&gt;</span>
+            </a>
+            <div class="nav-right">
+                <div id="auth-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="patterns-header">
+            <h1>My Patterns</h1>
+            <a href="/submit.html" class="btn btn-primary">+ Submit New Pattern</a>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="total-patterns">0</div>
+                <div class="stat-label">Total Patterns</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-votes">0</div>
+                <div class="stat-label">Total Votes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-installs">0</div>
+                <div class="stat-label">Total Installs</div>
+            </div>
+        </div>
+        
+        <div id="patterns-list">
+            <div class="empty-state">
+                <h2>No patterns yet</h2>
+                <p>You haven't submitted any patterns yet. Share your Claude Code knowledge with the community!</p>
+                <a href="/submit.html" class="btn btn-primary">Submit Your First Pattern</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/user');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    renderAuthSection();
+                    loadMyPatterns();
+                } else {
+                    // Not authenticated, redirect to home
+                    window.location.href = '/?message=Please sign in to view your patterns';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/';
+            }
+        }
+        
+        // Render auth section (similar to index.html)
+        function renderAuthSection() {
+            const authSection = document.getElementById('auth-section');
+            
+            if (currentUser) {
+                authSection.innerHTML = `
+                    <div class="user-menu">
+                        <img class="user-avatar" 
+                             src="${currentUser.avatar_url || 'https://github.com/identicons/' + currentUser.id + '.png'}" 
+                             alt="${currentUser.name}" 
+                             onclick="toggleUserMenu()">
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-info">
+                                <div class="user-name">${currentUser.name}</div>
+                                <div class="user-email">${currentUser.username}@github</div>
+                            </div>
+                            <a href="/my-patterns" class="dropdown-item active">My Patterns</a>
+                            <a href="/settings" class="dropdown-item">Settings</a>
+                            <div class="dropdown-item danger" onclick="logout()">Sign Out</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Toggle user menu
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const userMenu = document.querySelector('.user-menu');
+            if (userMenu && !userMenu.contains(e.target)) {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('active');
+                }
+            }
+        });
+        
+        // Load user's patterns
+        async function loadMyPatterns() {
+            try {
+                const response = await fetch(`/api/items?user=${currentUser.username}&limit=100`);
+                const data = await response.json();
+                
+                const patterns = data.items || [];
+                
+                // Update stats
+                document.getElementById('total-patterns').textContent = patterns.length;
+                
+                const totalVotes = patterns.reduce((sum, p) => sum + p.votes_up - p.votes_down, 0);
+                document.getElementById('total-votes').textContent = totalVotes;
+                
+                // Would need to track installs in the future
+                document.getElementById('total-installs').textContent = '0';
+                
+                // Render patterns
+                const patternsList = document.getElementById('patterns-list');
+                
+                if (patterns.length === 0) {
+                    return; // Keep empty state
+                }
+                
+                patternsList.innerHTML = patterns.map(pattern => `
+                    <div class="pattern-card">
+                        <div class="pattern-header">
+                            <a href="/pattern/${pattern.id}" class="pattern-title">${escapeHtml(pattern.title)}</a>
+                            <span class="pattern-type">${pattern.type}</span>
+                        </div>
+                        <p class="pattern-description">${escapeHtml(pattern.description)}</p>
+                        <div class="pattern-footer">
+                            <div class="pattern-stats">
+                                <span>⬆ ${pattern.votes_up - pattern.votes_down}</span>
+                                <span>📅 ${new Date(pattern.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <div class="pattern-actions">
+                                <button onclick="editPattern(${pattern.id})" class="btn btn-sm">Edit</button>
+                                <button onclick="deletePattern(${pattern.id})" class="btn btn-sm btn-danger">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load patterns:', error);
+                document.getElementById('patterns-list').innerHTML = `
+                    <div class="error-message">
+                        Failed to load your patterns. Please try again later.
+                    </div>
+                `;
+            }
+        }
+        
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+        
+        // Pattern actions (placeholders for now)
+        function editPattern(id) {
+            // TODO: Implement edit functionality
+            alert('Edit functionality coming soon!');
+        }
+        
+        function deletePattern(id) {
+            // TODO: Implement delete functionality
+            if (confirm('Are you sure you want to delete this pattern?')) {
+                alert('Delete functionality coming soon!');
+            }
+        }
+        
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>

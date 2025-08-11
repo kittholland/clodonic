@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pattern - Clodonic</title>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" id="prism-theme-light" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" id="prism-theme-dark" disabled />
     <style>
         * {
             margin: 0;
@@ -11,22 +14,52 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --border-color: #e0e0e0;
+            --code-bg: #f6f8fa;
+            --code-border: #d1d5da;
+            --copy-btn-bg: rgba(0, 0, 0, 0.05);
+            --copy-btn-hover: rgba(0, 0, 0, 0.1);
+            --copy-btn-text: #333;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0d1117;
+                --bg-secondary: #161b22;
+                --text-primary: #c9d1d9;
+                --text-secondary: #8b949e;
+                --border-color: #30363d;
+                --code-bg: #161b22;
+                --code-border: #30363d;
+                --copy-btn-bg: rgba(255, 255, 255, 0.1);
+                --copy-btn-hover: rgba(255, 255, 255, 0.2);
+                --copy-btn-text: #c9d1d9;
+            }
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #fafafa;
-            color: #1a1a1a;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-size: 15px;
             line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         /* Header */
         header {
-            background: white;
+            background: var(--bg-secondary);
             border-bottom: 2px solid #ff6600;
             padding: 16px 0;
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background-color 0.3s ease;
         }
         
         .header-content {
@@ -119,18 +152,50 @@
         /* Pattern Content */
         .pattern-content {
             margin: 24px 0;
-            padding: 20px;
-            background: #f8f8f8;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
+            background: var(--code-bg);
+            border-radius: 8px;
+            border: 1px solid var(--code-border);
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
         .pattern-content pre {
             margin: 0;
-            font-family: 'Monaco', 'Courier New', monospace;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 13px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            line-height: 1.6;
+            overflow-x: auto;
+            background: transparent !important;
+        }
+        
+        .pattern-content code {
+            background: transparent !important;
+        }
+        
+        .copy-full-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 12px;
+            background: var(--copy-btn-bg);
+            color: var(--copy-btn-text);
+            border: 1px solid var(--code-border);
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        
+        .copy-full-btn:hover {
+            background: var(--copy-btn-hover);
+        }
+        
+        .copy-full-btn.copied {
+            background: #4caf50;
+            border-color: #4caf50;
         }
         
         /* Tags */
@@ -296,6 +361,7 @@
         }
         
         function renderPattern(pattern) {
+            currentPattern = pattern; // Store for copy functionality
             const container = document.getElementById('pattern-detail');
             
             const typeLabels = {
@@ -329,7 +395,10 @@
                 </div>
                 
                 <div class="pattern-content">
-                    <pre>${escapeHtml(pattern.content)}</pre>
+                    <button class="copy-full-btn" onclick="copyFullCode()">
+                        Copy Code
+                    </button>
+                    <pre><code class="language-${getLanguageForType(pattern.type)}">${escapeHtml(pattern.content)}</code></pre>
                 </div>
                 
                 ${pattern.tags && pattern.tags.length > 0 ? `
@@ -368,6 +437,41 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+        
+        // Store current pattern for copy functionality
+        let currentPattern = null;
+        
+        // Get language for syntax highlighting based on type
+        function getLanguageForType(type) {
+            const languageMap = {
+                'claude_md': 'markdown',
+                'agent': 'yaml',
+                'prompt': 'markdown',
+                'hook': 'bash',
+                'command': 'bash'
+            };
+            return languageMap[type] || 'plaintext';
+        }
+        
+        // Copy full code to clipboard
+        function copyFullCode() {
+            const content = currentPattern?.content;
+            if (!content) return;
+            
+            const btn = document.querySelector('.copy-full-btn');
+            navigator.clipboard.writeText(content).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
         }
         
         async function votePattern(id) {
@@ -423,6 +527,44 @@
         
         // Load pattern on page load
         loadPattern();
+    </script>
+    
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script>
+        // Handle dark mode based on system preferences
+        function updateTheme() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const lightTheme = document.getElementById('prism-theme-light');
+            const darkTheme = document.getElementById('prism-theme-dark');
+            
+            if (isDark) {
+                lightTheme.disabled = true;
+                darkTheme.disabled = false;
+            } else {
+                lightTheme.disabled = false;
+                darkTheme.disabled = true;
+            }
+        }
+        
+        // Update theme on load and when system preference changes
+        updateTheme();
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+        
+        // Re-run Prism highlighting after content loads
+        const originalRenderPattern = renderPattern;
+        renderPattern = function(pattern) {
+            originalRenderPattern(pattern);
+            setTimeout(() => {
+                if (typeof Prism !== 'undefined') {
+                    Prism.highlightAll();
+                }
+            }, 100);
+        };
     </script>
 </body>
 </html>

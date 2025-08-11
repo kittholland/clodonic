@@ -79,3 +79,15 @@ CREATE INDEX IF NOT EXISTS idx_items_created ON items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_item_tags_item ON item_tags(item_id);
 CREATE INDEX IF NOT EXISTS idx_item_tags_tag ON item_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_votes_item ON votes(item_id);
+
+-- Sessions table for OAuth
+CREATE TABLE IF NOT EXISTS sessions (
+  id TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  username TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);

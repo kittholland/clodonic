@@ -37,9 +37,7 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": { 
-		"SITE_URL": "https://clodonic.ai",
-		"GITHUB_CLIENT_ID": "PLACEHOLDER_WILL_BE_SECRET",
-		"GITHUB_CLIENT_SECRET": "PLACEHOLDER_WILL_BE_SECRET"
+		"SITE_URL": "https://clodonic.ai"
 	},
 	"routes": [
 		{ "pattern": "clodonic.ai", "custom_domain": true },
