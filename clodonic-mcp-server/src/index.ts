@@ -360,143 +360,134 @@ If yes, I'll create: \`.claude/prompts/clodonic-${slug}.md\``;
 	): string {
 		const manifestEntry = this.generateManifestEntry(pattern, slug, date, ["CLAUDE.md"]);
 
+		const claudeContent = `\n<!-- BEGIN CLODONIC: ${slug} (ID: ${pattern.id}) -->\n<!-- Installed: ${date} | Author: @${author} | Version: 1.0.0 -->\n${pattern.content}\n<!-- END CLODONIC: ${slug} -->\n`;
+
 		return `${icon} **Installing "${pattern.title}" instructions**
 
-I'll add this pattern to your CLAUDE.md file.
+**UPDATE CLAUDE.MD FILE NOW:**
 
-**Step 1: Check existing CLAUDE.md**
-I'll verify if CLAUDE.md exists and check for any existing Clodonic patterns.
+**Step 1: Read existing CLAUDE.md** (if it exists)
 
-**Step 2: Append pattern to CLAUDE.md**
+**Step 2: Append this content to CLAUDE.md**
 Strategy: ${strategy}
+\`\`\`markdown${claudeContent}\`\`\`
+
+**Step 3: Update manifest**
+File: \`.claude/clodonic-manifest.json\`
+${manifestEntry}
+
+**Instructions will be active immediately** - no restart required.
+
+Updating CLAUDE.md now...`;
+	}
+
+	private generateAgentInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
+		const agentFile = `.claude/agents/clodonic-${slug}.md`;
+		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [agentFile]);
+
+		const agentContent = `---
+name: clodonic-${slug}
+description: ${pattern.description}
+tools: "*"
+---
+
+<!-- Clodonic Pattern: ${pattern.id} -->
+<!-- Title: ${pattern.title} -->
+<!-- Installed: ${date} -->
+<!-- Source: https://clodonic.ai/patterns/${pattern.id} -->
+
+${pattern.content}`;
+
+		return `${icon} **Installing "${pattern.title}" agent**
+
+**CREATE THESE FILES NOW:**
+
+**Step 1: Create agent file**
+File: \`${agentFile}\`
 \`\`\`markdown
-<!-- BEGIN CLODONIC: ${slug} (ID: ${pattern.id}) -->
-<!-- Installed: ${date} | Author: @${author} | Version: 1.0.0 -->
-${pattern.content}
-<!-- END CLODONIC: ${slug} -->
+${agentContent}
+\`\`\`
+
+**Step 2: Update manifest**
+File: \`.claude/clodonic-manifest.json\`
+${manifestEntry}
+
+⚠️ **Restart Required**
+After installation:
+1. Exit Claude Code: \`Ctrl+C\` (or \`Cmd+C\` on Mac)
+2. Continue session: \`claude --continue\`
+3. Use your new agent: "delegate to clodonic-${slug}"
+
+Creating these files now...`;
+	}
+
+	private generateCommandInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
+		const commandFile = `.claude/commands/clodonic-${slug}.md`;
+		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [commandFile]);
+
+		const commandContent = `<!-- Clodonic Pattern: ${pattern.id} -->
+<!-- Title: ${pattern.title} -->
+<!-- Installed: ${date} -->
+<!-- Source: https://clodonic.ai/patterns/${pattern.id} -->
+
+${pattern.content}`;
+
+		return `${icon} **Installing "${pattern.title}" command**
+
+**CREATE THESE FILES NOW:**
+
+**Step 1: Create command file**
+File: \`${commandFile}\`
+\`\`\`markdown
+${commandContent}
+\`\`\`
+
+**Step 2: Update manifest**
+File: \`.claude/clodonic-manifest.json\`
+${manifestEntry}
+
+**Usage after installation:**
+- Use with: \`/clodonic-${slug}\` or \`/${slug}\`
+- Available immediately - no restart required
+- Supports \`$ARGUMENTS\` for parameters
+
+Creating these files now...`;
+	}
+
+	private generateHookInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
+		// Try to determine hook type from content or default to PostToolUse
+		const hookType = this.extractHookType(pattern);
+		const manifestEntry = this.generateManifestEntry(pattern, slug, date, ["~/.claude/settings.json"]);
+
+		const hookEntry = {
+			matcher: "*",
+			hooks: [{
+				type: "command",
+				command: pattern.content.replace(/"/g, '\\"').replace(/\n/g, " && ")
+			}]
+		};
+
+		return `${icon} **Installing "${pattern.title}" hook**
+
+**UPDATE SETTINGS FILE NOW:**
+
+**Step 1: Read existing settings**
+File: \`~/.claude/settings.json\` (create if doesn't exist)
+
+**Step 2: Add hook to "${hookType}" array**
+Add this entry to the hooks.${hookType} array:
+\`\`\`json
+${JSON.stringify(hookEntry, null, 2)}
 \`\`\`
 
 **Step 3: Update manifest**
 File: \`.claude/clodonic-manifest.json\`
 ${manifestEntry}
 
-I'll now create/update these files for you.`;
-	}
+**Hook will trigger on:** ${hookType}
+**Matcher:** All tools (*)
 
-	private generateAgentInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
-		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [
-			`.claude/agents/clodonic-${slug}.yaml`,
-		]);
-
-		return `${icon} **Installing "${pattern.title}" agent package**
-
-This will add a new agent capability to your Claude Code environment.
-
-**Step 1: Create agent definition**
-File: \`.claude/agents/clodonic-${slug}.yaml\`
-\`\`\`yaml
-# Clodonic Pattern: ${pattern.id}
-# Title: ${pattern.title}
-# Installed: ${date}
-# Source: https://clodonic.ai/patterns/${pattern.id}
-
-${pattern.content}
-\`\`\`
-
-**Step 2: Register agent in configuration**
-File: \`.claude/claude.json\`
-Add to "agents" section:
-\`\`\`json
-"clodonic-${slug}": {
-  "type": "subagent",
-  "description": "${pattern.description.replace(/"/g, '\\"')}",
-  "config": ".claude/agents/clodonic-${slug}.yaml"
-}
-\`\`\`
-
-**Step 3: Update manifest**
-${manifestEntry}
-
-I'll create these files now.
-
-⚠️ **Restart Required**
-After installation:
-1. Exit Claude Code: \`Ctrl+C\` (or \`Cmd+C\` on Mac)
-2. Continue session: \`claude --continue\`
-3. Use your new agent: "delegate to clodonic-${slug}"`;
-	}
-
-	private generateCommandInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
-		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [
-			`.claude/commands/clodonic-${slug}.md`,
-		]);
-
-		return `${icon} **Installing "${pattern.title}" command**
-
-This will add a new slash command to your Claude Code environment.
-
-**Step 1: Create command file**
-File: \`.claude/commands/clodonic-${slug}.md\`
-\`\`\`markdown
-<!-- Clodonic Pattern: ${pattern.id} -->
-<!-- Title: ${pattern.title} -->
-<!-- Installed: ${date} -->
-
-${pattern.content}
-\`\`\`
-
-**Step 2: Register command in configuration**
-File: \`.claude/claude.json\`
-Add to "commands" section:
-\`\`\`json
-"${slug}": {
-  "description": "${pattern.description.replace(/"/g, '\\"')}",
-  "file": ".claude/commands/clodonic-${slug}.md"
-}
-\`\`\`
-
-**Step 3: Update manifest**
-${manifestEntry}
-
-I'll create these files now.
-
-⚠️ **Restart Required**
-After installation:
-1. Exit Claude Code: \`Ctrl+C\` (or \`Cmd+C\` on Mac)
-2. Continue session: \`claude --continue\`
-3. Use your command: \`/${slug}\``;
-	}
-
-	private generateHookInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
-		// Try to determine hook type from content or default to post-commit
-		const hookType = this.extractHookType(pattern);
-		const manifestEntry = this.generateManifestEntry(pattern, slug, date, []);
-
-		return `${icon} **Installing "${pattern.title}" hook**
-
-This will add an automated trigger to your Claude Code environment.
-
-**Step 1: Update hooks configuration**
-File: \`.claude/settings.json\`
-Add to "hooks.${hookType}" array:
-\`\`\`json
-{
-  "id": "clodonic-${pattern.id}",
-  "command": "${pattern.content.replace(/"/g, '\\"').replace(/\n/g, "\\n")}",
-  "description": "${pattern.title}"
-}
-\`\`\`
-
-**Step 2: Update manifest**
-${manifestEntry}
-
-I'll update the settings file now.
-
-⚠️ **Restart Required**
-After installation:
-1. Exit Claude Code: \`Ctrl+C\` (or \`Cmd+C\` on Mac)
-2. Continue session: \`claude --continue\`
-3. Hook will trigger automatically on: ${hookType}`;
+Updating settings file now...`;
 	}
 
 	private generateManifestEntry(pattern: Pattern, slug: string, date: string, files: string[]): string {
@@ -516,10 +507,12 @@ After installation:
 	private extractHookType(pattern: Pattern): string {
 		// Simple heuristic - could be improved with pattern metadata
 		const content = pattern.content.toLowerCase();
-		if (content.includes("commit")) return "post-commit";
-		if (content.includes("push")) return "pre-push";
-		if (content.includes("pull")) return "post-pull";
-		return "post-commit"; // default
+		if (content.includes("start") || content.includes("session")) return "Start";
+		if (content.includes("before") || content.includes("pre")) return "PreToolUse";
+		if (content.includes("prompt") || content.includes("submit")) return "UserPromptSubmit";
+		if (content.includes("notification")) return "Notification";
+		if (content.includes("stop") || content.includes("finish")) return "Stop";
+		return "PostToolUse"; // default - most common use case
 	}
 
 	private slugify(text: string): string {
