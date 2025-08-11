@@ -191,19 +191,25 @@
         
         .header-search input {
             width: 100%;
-            padding: 10px 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #f8f8f8;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
             transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
         
         .header-search input:focus {
             outline: none;
             border-color: #ff6600;
             background: white;
-            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+            box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .header-search input::placeholder {
+            color: #999;
+            font-weight: 400;
         }
         
         /* Pattern Type Pills */
@@ -873,16 +879,16 @@
                 <div class="stat-label">Patterns</div>
             </div>
             <div class="stat">
-                <div class="stat-value" id="weekly-installs">0</div>
-                <div class="stat-label">Weekly Installs</div>
+                <div class="stat-value" id="total-tags">-</div>
+                <div class="stat-label">Tags</div>
             </div>
             <div class="stat">
-                <div class="stat-value" id="contributors">1</div>
-                <div class="stat-label">Contributors</div>
+                <div class="stat-value" id="total-votes">-</div>
+                <div class="stat-label">Community Votes</div>
             </div>
             <div class="stat">
-                <div class="stat-value" id="new-today">0</div>
-                <div class="stat-label">New Today</div>
+                <div class="stat-value" id="pattern-types">5</div>
+                <div class="stat-label">Pattern Types</div>
             </div>
         </div>
         
@@ -937,6 +943,7 @@
         let isLoading = false;
         let searchTimeout = null;
         let allPatterns = []; // Cache for client-side filtering
+        let fullPatternDataset = []; // Full dataset for type counts
         let currentUser = null;
         
         // Get URL params
@@ -1148,6 +1155,10 @@
                 
                 if (currentOffset === 0) {
                     allPatterns = data.items || [];
+                    // Store full dataset when loading all patterns (no type filter)
+                    if (!currentType && !currentTag) {
+                        fullPatternDataset = [...allPatterns];
+                    }
                     renderPatterns(allPatterns);
                 } else {
                     allPatterns = [...allPatterns, ...(data.items || [])];
@@ -1249,7 +1260,12 @@
         
         // Update stats
         function updateStats(total) {
-            document.getElementById('total-patterns').textContent = total || allPatterns.length;
+            // Use the correct total from API, not the inflated number
+            document.getElementById('total-patterns').textContent = allPatterns.length;
+            
+            // Calculate total votes from loaded patterns
+            const totalVotes = allPatterns.reduce((sum, pattern) => sum + (pattern.votes_up || 0), 0);
+            document.getElementById('total-votes').textContent = totalVotes;
         }
         
         // Load popular tags
@@ -1257,6 +1273,9 @@
             try {
                 const response = await fetch('/api/tags');
                 const tags = await response.json();
+                
+                // Update total tags stat
+                document.getElementById('total-tags').textContent = tags.length;
                 
                 const container = document.getElementById('popular-tags');
                 container.innerHTML = `
@@ -1388,10 +1407,12 @@
             });
         });
         
-        // Update type pill counts
+        // Update type pill counts - always use full dataset for counts
         function updateTypeCounts() {
             const typeCounts = {};
-            allPatterns.forEach(pattern => {
+            // Use fullPatternDataset to maintain accurate counts regardless of filtering
+            const datasetToUse = fullPatternDataset.length ? fullPatternDataset : allPatterns;
+            datasetToUse.forEach(pattern => {
                 typeCounts[pattern.type] = (typeCounts[pattern.type] || 0) + 1;
             });
             
@@ -1399,20 +1420,19 @@
                 const type = pill.dataset.type;
                 const countSpan = pill.querySelector('.count');
                 if (type === '') {
-                    countSpan.textContent = allPatterns.length;
+                    countSpan.textContent = datasetToUse.length;
                 } else {
                     countSpan.textContent = typeCounts[type] || 0;
                 }
             });
         }
         
-        // Call updateTypeCounts after loading patterns
+        // Call updateTypeCounts after loading patterns - always maintain total counts
         const originalRenderPatterns = renderPatterns;
         renderPatterns = function(patterns) {
             originalRenderPatterns(patterns);
-            if (patterns === allPatterns) {
-                updateTypeCounts();
-            }
+            // Always update counts based on full dataset, not filtered results
+            updateTypeCounts();
         };
     </script>
 </body>
