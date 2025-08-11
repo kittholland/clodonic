@@ -486,6 +486,108 @@
         .char-counter.error {
             color: #d32f2f;
         }
+        
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            header {
+                padding: 12px 0;
+            }
+            
+            .header-content {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                font-size: 20px;
+            }
+            
+            .tagline {
+                display: none;
+            }
+            
+            .submit-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+            
+            .submit-card {
+                padding: 20px;
+            }
+            
+            .submit-title {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+            
+            .submit-intro {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+            
+            .form-group label {
+                font-size: 13px;
+            }
+            
+            .form-control, .form-select, .form-textarea {
+                font-size: 14px;
+                padding: 10px;
+            }
+            
+            .char-limit {
+                font-size: 11px;
+            }
+            
+            .form-help {
+                font-size: 12px;
+            }
+            
+            .tag-select {
+                max-height: 150px;
+            }
+            
+            .tag-chip {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+            
+            .submit-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+                justify-content: center;
+            }
+            
+            .warning-box {
+                padding: 12px;
+                font-size: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .error-message, .success-message {
+                padding: 12px;
+                font-size: 13px;
+            }
+        }
+        
+        /* Small mobile styles */
+        @media (max-width: 480px) {
+            .submit-card {
+                padding: 15px;
+            }
+            
+            .submit-title {
+                font-size: 20px;
+            }
+            
+            .form-control, .form-select, .form-textarea {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>

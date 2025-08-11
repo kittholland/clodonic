@@ -310,6 +310,120 @@
         .error-state p {
             color: #666;
         }
+        
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            header {
+                padding: 12px 0;
+            }
+            
+            .header-content {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                font-size: 20px;
+            }
+            
+            .tagline {
+                display: none;
+            }
+            
+            .pattern-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+            
+            .pattern-card {
+                padding: 20px;
+                border-radius: 8px;
+            }
+            
+            .pattern-title {
+                font-size: 22px;
+            }
+            
+            .pattern-type {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+            
+            .pattern-description {
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+            
+            .pattern-meta {
+                flex-wrap: wrap;
+                gap: 12px;
+                font-size: 12px;
+                padding-bottom: 15px;
+            }
+            
+            .pattern-content {
+                margin: 20px 0;
+            }
+            
+            .pattern-content pre {
+                padding: 15px;
+                font-size: 12px;
+            }
+            
+            .copy-full-btn {
+                top: 8px;
+                right: 8px;
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            
+            .pattern-tags {
+                gap: 6px;
+                margin: 15px 0;
+            }
+            
+            .tag {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            
+            .pattern-actions {
+                flex-direction: column;
+                gap: 8px;
+                margin-top: 20px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+                justify-content: center;
+            }
+            
+            .back-link {
+                font-size: 13px;
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Small mobile styles */
+        @media (max-width: 480px) {
+            .pattern-card {
+                padding: 15px;
+            }
+            
+            .pattern-title {
+                font-size: 20px;
+            }
+            
+            .pattern-meta {
+                font-size: 11px;
+            }
+            
+            .pattern-content pre {
+                font-size: 11px;
+                padding: 12px;
+            }
+        }
     </style>
 </head>
 <body>
