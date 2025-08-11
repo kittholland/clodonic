@@ -38,25 +38,6 @@ app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Debug endpoint to verify secrets are loaded (remove in production!)
-app.get('/api/debug/secrets', (c) => {
-  const hasClientId = !!c.env.GITHUB_CLIENT_ID;
-  const hasClientSecret = !!c.env.GITHUB_CLIENT_SECRET;
-  const clientIdLength = c.env.GITHUB_CLIENT_ID ? c.env.GITHUB_CLIENT_ID.length : 0;
-  const clientIdPrefix = c.env.GITHUB_CLIENT_ID ? c.env.GITHUB_CLIENT_ID.substring(0, 4) : 'none';
-  const clientIdFull = c.env.GITHUB_CLIENT_ID || 'none';
-  const hasWhitespace = c.env.GITHUB_CLIENT_ID ? c.env.GITHUB_CLIENT_ID !== c.env.GITHUB_CLIENT_ID.trim() : false;
-  
-  return c.json({ 
-    hasClientId,
-    hasClientSecret,
-    clientIdLength,
-    clientIdPrefix,
-    clientIdFull,
-    hasWhitespace,
-    siteUrl: c.env.SITE_URL 
-  });
-});
 
 // List items
 app.get('/api/items', async (c) => {

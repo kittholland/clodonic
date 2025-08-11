@@ -54,3 +54,6 @@ temp/
 # Test files
 test-frontend.js
 clodonic-homepage.png
+
+# Planning documents (internal)
+planning/
