@@ -47,7 +47,20 @@ export class ClodonicMCP extends McpAgent {
 			},
 			async ({ query, type }) => {
 				try {
-					const params = new URLSearchParams({ q: query });
+					// Input validation to prevent abuse
+					if (query.length > 200) {
+						return {
+							content: [{
+								type: "text",
+								text: "❌ Search query too long (max 200 characters)"
+							}],
+						};
+					}
+					
+					// Sanitize query to prevent injection attempts
+					const sanitizedQuery = query.replace(/[<>'"]/g, '');
+					
+					const params = new URLSearchParams({ q: sanitizedQuery });
 					if (type) params.set("type", type);
 
 					const response = await fetch(`${this.apiUrl}/search?${params}`, {
@@ -67,6 +80,7 @@ export class ClodonicMCP extends McpAgent {
 					}
 
 					const data = await response.json();
+					// Limit results to prevent memory abuse
 					const results = data.results?.slice(0, 10) || [];
 
 					if (results.length === 0) {
@@ -112,6 +126,16 @@ export class ClodonicMCP extends McpAgent {
 			},
 			async ({ patternId }) => {
 				try {
+					// Validate pattern ID to prevent enumeration attacks
+					if (patternId < 1 || patternId > 100000) {
+						return {
+							content: [{
+								type: "text",
+								text: `❌ Invalid pattern ID: ${patternId}`
+							}],
+						};
+					}
+					
 					const response = await fetch(`${this.apiUrl}/items/${patternId}`, {
 						headers: {
 							"User-Agent": "Clodonic-MCP/2.0.0",
@@ -179,6 +203,16 @@ export class ClodonicMCP extends McpAgent {
 			},
 			async ({ patternId, dryRun, strategy }) => {
 				try {
+					// Validate pattern ID to prevent enumeration attacks
+					if (patternId < 1 || patternId > 100000) {
+						return {
+							content: [{
+								type: "text",
+								text: `❌ Invalid pattern ID: ${patternId}`
+							}],
+						};
+					}
+					
 					const response = await fetch(`${this.apiUrl}/items/${patternId}`, {
 						headers: {
 							"User-Agent": "Clodonic-MCP/2.0.0",
