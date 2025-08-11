@@ -13,13 +13,18 @@ Building a minimalist pattern repository for Claude Code best practices at clodo
 ## Project Structure
 ```
 /clodonic
-  /clodonic-api          - Hono API on Workers
+  /clodonic-api          - Full-stack Hono app (API + UI)
     /src                 - API source code
       - index.ts         - Main API routes
-      - auth.ts          - OAuth logic
-    /public              - Static frontend files
+      - auth.ts          - OAuth logic  
+    /public              - Frontend files (HTML/CSS/JS)
     - schema.sql         - D1 database schema
+    - seed-data-2025.sql - Production seed data
     - wrangler.jsonc     - Cloudflare config
+  /clodonic-mcp-server   - MCP server for Claude Code
+    /src                 - MCP implementation
+      - index.ts         - Pattern tools (search/install)
+    - wrangler.jsonc     - MCP server config
   - REQUIREMENTS.md      - Full requirements spec
   - DEPLOYMENT-2025.md   - Current deployment guide
   - BRANDING.md          - Design system
@@ -30,29 +35,36 @@ Building a minimalist pattern repository for Claude Code best practices at clodo
 - [x] Domain registered and DNS configured (clodonic.ai)
 - [x] MVP complete with all core features
 - [x] GitHub OAuth implemented
-- [x] Database deployed to production with sample data
-- [x] Worker deployed with Custom Domains
+- [x] Database deployed with comprehensive seed data (22 patterns)
+- [x] Full-stack Worker deployed with Custom Domains
+- [x] MCP server deployed at mcp.clodonic.ai for Claude Code integration
 - [x] Git repository at github.com/kittholland/clodonic
 - [x] Production logging and monitoring implemented
 - [x] Rate limiting (30 patterns/hr, 10 votes/min)
-- [x] All error handling fixed (vote endpoint 500 → 401)
 - [x] Enhanced validation system for instructional content security
-- [x] Cloudflare Workers GitHub app installed and configured
-- [x] Auto-deployment via Git integration working
-- [x] Client-side filtering with instant UX (no refresh)
+- [x] Monorepo auto-deployment with watch paths configured
+- [x] Improved homepage UX with MCP hero section and expandable code blocks
+- [x] Comprehensive tag system (108 tags) with proper associations
 
 ## Development Commands
 ```bash
-# Local development
-npm run dev              # Start at http://localhost:8787
+# Local development (API + UI)
+cd clodonic-api && npm run dev              # Start at http://localhost:8787
+
+# Local development (MCP server)  
+cd clodonic-mcp-server && wrangler dev      # Start MCP server locally
 
 # Database
-wrangler d1 execute clodonic-db --local --file=schema.sql   # Local DB
-wrangler d1 execute clodonic-db --remote --file=schema.sql  # Prod DB
+wrangler d1 execute clodonic-db --remote --file=schema.sql       # Reset schema
+wrangler d1 execute clodonic-db --remote --file=seed-data-2025.sql # Load seed data
 
-# Deployment
-wrangler deploy          # Deploy to production
-wrangler tail            # View production logs
+# Manual deployment (auto-deploy preferred)
+cd clodonic-api && wrangler deploy          # Deploy main app
+cd clodonic-mcp-server && wrangler deploy   # Deploy MCP server
+wrangler tail                               # View production logs
+
+# MCP integration
+claude mcp add https://mcp.clodonic.ai      # Install MCP server in Claude Code
 
 # Playwright/Browser issues
 pkill -f Chrome          # If browser is already in use error
