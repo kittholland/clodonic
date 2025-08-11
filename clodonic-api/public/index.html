@@ -1217,7 +1217,7 @@
                             <span>📦 0 installs</span>
                             <span>👤 ${pattern.submitter_name === 'clodonic-system' ? 'Clodonic Team' : DOMPurify.sanitize(pattern.submitter_name || 'Anonymous')}</span>
                         </div>
-                        <button class="vote-btn" onclick="votePattern(${pattern.id}, 1)">
+                        <button class="vote-btn${pattern.user_voted ? ' voted' : ''}" onclick="votePattern(${pattern.id}, 1)">
                             ⬆ Vote
                         </button>
                     </div>
@@ -1233,7 +1233,8 @@
         // Vote on pattern
         async function votePattern(id, vote) {
             if (!currentUser) {
-                alert('Please sign in to vote on patterns.');
+                // Redirect to OAuth login
+                window.location.href = '/api/auth/github';
                 return;
             }
             
@@ -1250,14 +1251,22 @@
                     const card = document.querySelector(`[data-id="${id}"]`);
                     const voteSpan = card.querySelector('.pattern-stats span:first-child');
                     voteSpan.textContent = `⬆ ${data.votes_up}`;
+                    
+                    // Toggle vote button state
+                    const voteBtn = card.querySelector('.vote-btn');
+                    voteBtn.classList.toggle('voted');
                 } else if (response.status === 401) {
-                    alert('Please sign in to vote on patterns.');
+                    // Session expired, redirect to login
+                    window.location.href = '/api/auth/github';
                 } else {
                     throw new Error('Failed to vote');
                 }
             } catch (error) {
                 console.error('Vote failed:', error);
-                alert('Failed to vote. Please try again.');
+                // Only show alert for actual errors, not auth issues
+                if (error.message !== 'Failed to vote') {
+                    alert('Failed to vote. Please try again.');
+                }
             }
         }
         

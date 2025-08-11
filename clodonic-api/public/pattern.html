@@ -410,7 +410,7 @@
                 ` : ''}
                 
                 <div class="pattern-actions">
-                    <button class="btn vote-btn" onclick="votePattern(${pattern.id})">
+                    <button class="btn vote-btn${pattern.user_voted ? ' voted' : ''}" onclick="votePattern(${pattern.id})">
                         <span>⬆</span> Vote
                     </button>
                     <button class="btn btn-primary" onclick="copyPattern(${pattern.id})">
@@ -483,7 +483,8 @@
                 });
                 
                 if (response.status === 401) {
-                    alert('Please sign in to vote');
+                    // Redirect to OAuth login instead of alert
+                    window.location.href = '/api/auth/github';
                     return;
                 }
                 

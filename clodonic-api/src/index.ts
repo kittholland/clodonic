@@ -69,18 +69,27 @@ app.get('/api/items', async (c) => {
   const { type, sort = 'hot', limit = '30', offset = '0', user, tag, timeframe } = c.req.query();
   const queryStart = Date.now();
   
+  // Get current user if authenticated
+  const session = await getUserFromRequest(c);
+  const currentUserId = session?.userId;
+  
   let query = `
     SELECT i.*, 
            u.username as submitter_name,
-           GROUP_CONCAT(t.name) as tag_names
+           GROUP_CONCAT(DISTINCT t.name) as tag_names${currentUserId ? ',\n           v.vote as user_vote' : ''}
     FROM items i
     LEFT JOIN users u ON i.submitter_id = u.id
     LEFT JOIN item_tags it ON i.id = it.item_id
-    LEFT JOIN tags t ON it.tag_id = t.id
+    LEFT JOIN tags t ON it.tag_id = t.id${currentUserId ? '\n    LEFT JOIN votes v ON i.id = v.item_id AND v.user_id = ?' : ''}
   `;
   
   const conditions: string[] = [];
   const params: any[] = [];
+  
+  // Add user_id parameter if authenticated
+  if (currentUserId) {
+    params.push(currentUserId);
+  }
   
   if (type) {
     conditions.push('i.type = ?');
@@ -150,11 +159,12 @@ app.get('/api/items', async (c) => {
     });
   }
   
-  // Parse tag names
+  // Parse tag names and include vote status
   const items = result.results?.map((item: any) => ({
     ...item,
     tags: item.tag_names ? item.tag_names.split(',') : [],
-    submitter_name: item.submitter_name || 'anonymous'
+    submitter_name: item.submitter_name || 'anonymous',
+    user_voted: item.user_vote === 1 // true if user voted up, false otherwise
   })) || [];
   
   return c.json({
@@ -166,6 +176,10 @@ app.get('/api/items', async (c) => {
 // Get single item
 app.get('/api/items/:id', async (c) => {
   const id = c.req.param('id');
+  
+  // Get current user if authenticated
+  const session = await getUserFromRequest(c);
+  const currentUserId = session?.userId;
   
   const item = await c.env.DB.prepare(
     'SELECT * FROM items WHERE id = ?'
@@ -183,9 +197,19 @@ app.get('/api/items/:id', async (c) => {
     WHERE it.item_id = ?
   `).bind(id).all();
   
+  // Get user's vote if authenticated
+  let userVoted = false;
+  if (currentUserId) {
+    const vote = await c.env.DB.prepare(
+      'SELECT vote FROM votes WHERE user_id = ? AND item_id = ?'
+    ).bind(currentUserId, id).first();
+    userVoted = vote?.vote === 1;
+  }
+  
   return c.json({
     ...item,
     tags: tags.results,
+    user_voted: userVoted
   });
 });
 
