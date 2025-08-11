@@ -866,10 +866,17 @@
                 const headingMatch = content.match(/^#\s+(.+)$/m);
                 if (headingMatch) metadata.title = headingMatch[1].trim();
             } else if (type === 'hook') {
-                // Look for comments at the top
-                const commentMatch = content.match(/^#\s*(.+)$/m);
-                if (commentMatch && !commentMatch[1].startsWith('!')) {
-                    metadata.description = commentMatch[1].trim();
+                // Parse JSON hook configuration
+                try {
+                    const hookConfig = JSON.parse(content);
+                    if (hookConfig.description) metadata.description = hookConfig.description;
+                    if (hookConfig.event) metadata.title = `${hookConfig.event} Hook`;
+                } catch (e) {
+                    // Fallback for non-JSON hooks
+                    const commentMatch = content.match(/^#\s*(.+)$/m);
+                    if (commentMatch && !commentMatch[1].startsWith('!')) {
+                        metadata.description = commentMatch[1].trim();
+                    }
                 }
             }
             
