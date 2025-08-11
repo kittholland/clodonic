@@ -336,13 +336,15 @@ export class ClodonicMCP extends McpAgent {
 	private generatePromptInstructions(pattern: Pattern, icon: string, slug: string): string {
 		return `${icon} **"${pattern.title}" Prompt**
 
-I'll apply this approach to your current work:
+**APPLY THIS METHODOLOGY IMMEDIATELY TO CURRENT CONTEXT:**
 
----
 ${pattern.content}
----
 
-I'm now using this pattern in our conversation.
+**Instructions for Claude:**
+- Apply the above methodology to whatever task, problem, or context we were just discussing
+- Follow the structure and approach outlined in the pattern
+- Do not just acknowledge the pattern - actively use it to address the current situation
+- If no current context exists, ask the user what they want you to apply this methodology to
 
 **Optional:** Would you like me to save this for future reference?
 If yes, I'll create: \`.claude/prompts/clodonic-${slug}.md\``;
