@@ -532,13 +532,18 @@ ${agentInstructions}`;
 
 **CREATE THESE FILES NOW:**
 
-**Step 1: Create agent file**
-File: \`${agentFile}\`
-\`\`\`markdown
-${agentContent}
+**Step 1: Ensure directory exists**
+\`\`\`bash
+mkdir -p ~/.claude/agents
 \`\`\`
 
-**Step 2: Update manifest**
+**Step 2: Create agent file**
+File: \`${agentFile}\`
+\`\`\`markdown
+${agentContent.startsWith('---\n') ? agentContent : `---\n${agentContent}`}
+\`\`\`
+
+**Step 3: Update manifest**
 File: \`.claude/clodonic-manifest.json\`
 ${manifestEntry}
 
@@ -546,7 +551,14 @@ ${manifestEntry}
 After installation:
 1. Exit Claude Code: \`Ctrl+C\` (or \`Cmd+C\` on Mac)
 2. Continue session: \`claude --continue\`
-3. Use your new agent: "delegate to clodonic-${slug}"
+
+**How to use your new subagent:**
+- Claude will automatically delegate to this subagent when appropriate
+- You can also explicitly request: "use the ${agentName} agent to..."
+- The subagent operates in its own isolated context with specialized instructions
+- Check available agents with: \`/agents\` command
+
+**This is a TRUE Claude Code subagent** that will be automatically invoked based on its description!
 
 Creating these files now...`;
 	}
@@ -627,7 +639,8 @@ Updating settings file now...`;
 	}
 
 	private generateManifestEntry(pattern: Pattern, slug: string, date: string, files: string[]): string {
-		return `\`\`\`json
+		return `Read existing manifest (if exists) and merge this entry:
+\`\`\`json
 {
   "${slug}": {
     "id": ${pattern.id},
@@ -637,7 +650,8 @@ Updating settings file now...`;
     "files": ${JSON.stringify(files, null, 2).split("\n").join("\n    ")}
   }
 }
-\`\`\``;
+\`\`\`
+**Important**: If manifest exists, add this as a new key to the existing object. Don't replace the entire file.`;
 	}
 
 	private extractHookType(pattern: Pattern): string {
