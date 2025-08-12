@@ -357,9 +357,13 @@ export class ClodonicMCP extends McpAgent {
 				preview += `📝 Would update: .claude/settings.json\n`;
 				preview += `⚠️ Restart required after installation\n`;
 				preview += `\n**Hook configuration:**\n\`\`\`json\n`;
-				preview += `{\n  "id": "clodonic-${pattern.id}",\n`;
-				preview += `  "command": "${pattern.content.replace(/"/g, '\\"')}",\n`;
-				preview += `  "description": "${pattern.title}"\n}\n\`\`\``;
+				let hookConfig;
+				try {
+					hookConfig = JSON.parse(pattern.content);
+				} catch (e) {
+					hookConfig = { command: pattern.content };
+				}
+				preview += JSON.stringify(hookConfig, null, 2) + `\n\`\`\``;
 				break;
 		}
 
@@ -489,17 +493,23 @@ Creating these files now...`;
 	}
 
 	private generateHookInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
-		// Try to determine hook type from content or default to PostToolUse
+		// Parse the hook configuration from the pattern content
+		let hookConfig;
+		try {
+			hookConfig = JSON.parse(pattern.content);
+		} catch (e) {
+			// Fallback for non-JSON hooks
+			hookConfig = {
+				hooks: [{
+					type: "command",
+					command: pattern.content
+				}]
+			};
+		}
+
+		// Extract event type from metadata or pattern
 		const hookType = this.extractHookType(pattern);
 		const manifestEntry = this.generateManifestEntry(pattern, slug, date, ["~/.claude/settings.json"]);
-
-		const hookEntry = {
-			matcher: "*",
-			hooks: [{
-				type: "command",
-				command: pattern.content.replace(/"/g, '\\"').replace(/\n/g, " && ")
-			}]
-		};
 
 		return `${icon} **Installing "${pattern.title}" hook**
 
@@ -511,7 +521,7 @@ File: \`~/.claude/settings.json\` (create if doesn't exist)
 **Step 2: Add hook to "${hookType}" array**
 Add this entry to the hooks.${hookType} array:
 \`\`\`json
-${JSON.stringify(hookEntry, null, 2)}
+${JSON.stringify(hookConfig, null, 2)}
 \`\`\`
 
 **Step 3: Update manifest**
@@ -519,7 +529,7 @@ File: \`.claude/clodonic-manifest.json\`
 ${manifestEntry}
 
 **Hook will trigger on:** ${hookType}
-**Matcher:** All tools (*)
+**Matcher:** ${hookConfig.matcher || "All tools (*)"}
 
 Updating settings file now...`;
 	}
@@ -539,13 +549,25 @@ Updating settings file now...`;
 	}
 
 	private extractHookType(pattern: Pattern): string {
-		// Simple heuristic - could be improved with pattern metadata
+		// Try to extract from description or content
+		const description = pattern.description.toLowerCase();
 		const content = pattern.content.toLowerCase();
-		if (content.includes("start") || content.includes("session")) return "Start";
+		
+		// Check description first (more reliable)
+		if (description.includes("pretooluse")) return "PreToolUse";
+		if (description.includes("posttooluse")) return "PostToolUse";
+		if (description.includes("userpromptsubmit")) return "UserPromptSubmit";
+		if (description.includes("sessionstart")) return "SessionStart";
+		if (description.includes("stop")) return "Stop";
+		
+		// Fallback to content analysis
+		if (content.includes("pretooluse")) return "PreToolUse";
+		if (content.includes("posttooluse")) return "PostToolUse";
+		if (content.includes("userpromptsubmit")) return "UserPromptSubmit";
 		if (content.includes("before") || content.includes("pre")) return "PreToolUse";
+		if (content.includes("after") || content.includes("post")) return "PostToolUse";
 		if (content.includes("prompt") || content.includes("submit")) return "UserPromptSubmit";
-		if (content.includes("notification")) return "Notification";
-		if (content.includes("stop") || content.includes("finish")) return "Stop";
+		
 		return "PostToolUse"; // default - most common use case
 	}
 
