@@ -420,96 +420,82 @@ Identify dependencies between tasks.',
  2, 0, datetime('now', '-8 days'));
 
 -- =====================================
--- HOOK PATTERNS
+-- HOOK PATTERNS (Claude Code Event Hooks)
 -- =====================================
 
 INSERT INTO items (type, title, description, content, file_hash, submitter_id, votes_up, votes_down, created_at) VALUES
-('hook', 'Pre-commit Code Quality Check',
- 'Comprehensive pre-commit hook for code quality and security',
- '#!/bin/bash
-# Pre-commit hook for code quality
-
-# Run formatters
-echo "🎨 Formatting code..."
-npm run format:check || exit 1
-
-# Run linters
-echo "🔍 Linting code..."
-npm run lint || exit 1
-
-# Run type checking
-echo "📝 Type checking..."
-npm run typecheck || exit 1
-
-# Run tests for changed files
-echo "🧪 Running tests..."
-npm run test:changed || exit 1
-
-# Security audit
-echo "🔒 Security check..."
-npm audit --audit-level=high || exit 1
-
-echo "✅ All checks passed!"',
- 'seed_hook_001_precommit',
+('hook', 'Prevent Dangerous Commands',
+ 'PreToolUse hook that blocks destructive bash commands like rm -rf',
+ '{
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\n# Block dangerous commands\nPAYLOAD=$(echo \"$CLAUDE_HOOK_PAYLOAD\" | jq -r ''.command'')\nif echo \"$PAYLOAD\" | grep -qE ''rm -rf|rm -fr|:>|dd if=/dev/zero|chmod -R 777''; then\n  echo \"🚫 Blocked dangerous command: $PAYLOAD\"\n  exit 1\nfi\nexit 0"
+    }
+  ]
+}',
+ 'seed_hook_001_prevent_dangerous',
  (SELECT id FROM users WHERE username = 'clodonic-system'),
  1, 0, datetime('now', '-24 days')),
 
-('hook', 'Auto-generate PR Description',
- 'Automatically generates PR descriptions from commits and changes',
- '#!/bin/bash
-# Generate PR description from commits
-
-BRANCH=$(git branch --show-current)
-BASE_BRANCH="main"
-
-echo "## Changes"
-echo ""
-
-# List all commits
-git log $BASE_BRANCH..$BRANCH --oneline | while read line; do
-  echo "- $line"
-done
-
-echo ""
-echo "## Files Changed"
-git diff --stat $BASE_BRANCH..$BRANCH
-
-echo ""
-echo "## Checklist"
-echo "- [ ] Tests pass"
-echo "- [ ] Documentation updated"
-echo "- [ ] No console.logs"
-echo "- [ ] Follows code style"',
- 'seed_hook_002_pr_description',
+('hook', 'Auto-Format Code on Save',
+ 'PostToolUse hook that automatically formats code after file edits',
+ '{
+  "matcher": "Write|Edit|MultiEdit",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\n# Auto-format based on file extension\nFILE=$(echo \"$CLAUDE_HOOK_PAYLOAD\" | jq -r ''.file_path'')\nif [[ -n \"$FILE\" ]]; then\n  case \"$FILE\" in\n    *.py) black \"$FILE\" 2>/dev/null || true ;;\n    *.js|*.jsx) prettier --write \"$FILE\" 2>/dev/null || true ;;\n    *.ts|*.tsx) prettier --write \"$FILE\" 2>/dev/null || true ;;\n    *.go) gofmt -w \"$FILE\" 2>/dev/null || true ;;\n  esac\nfi\nexit 0"
+    }
+  ]
+}',
+ 'seed_hook_002_auto_format',
  (SELECT id FROM users WHERE username = 'clodonic-system'),
  0, 0, datetime('now', '-19 days')),
 
-('hook', 'Database Backup Before Migration',
- 'Automatically backup database before running migrations',
- '#!/bin/bash
-# Backup database before migrations
-
-DB_NAME=${DB_NAME:-"production"}
-BACKUP_DIR=${BACKUP_DIR:-"./backups"}
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-echo "📦 Backing up database..."
-mkdir -p $BACKUP_DIR
-
-# Create backup
-pg_dump $DB_NAME > "$BACKUP_DIR/backup_$TIMESTAMP.sql"
-
-if [ $? -eq 0 ]; then
-  echo "✅ Backup created: backup_$TIMESTAMP.sql"
-  # Keep only last 5 backups
-  ls -t $BACKUP_DIR/*.sql | tail -n +6 | xargs rm -f
-else
-  echo "❌ Backup failed! Aborting migration."
-  exit 1
-fi',
- 'seed_hook_003_db_backup',
+('hook', 'Audit Log All Tool Usage',
+ 'PostToolUse hook that logs all Claude Code actions for compliance',
+ '{
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\n# Log tool usage with timestamp\nLOG_FILE=\"$HOME/.claude-audit.log\"\nTIMESTAMP=$(date -u +\"%Y-%m-%d %H:%M:%S UTC\")\nTOOL_NAME=$(echo \"$CLAUDE_HOOK_PAYLOAD\" | jq -r ''.tool_name // \"unknown\"'')\nSESSION_ID=$(echo \"$CLAUDE_HOOK_PAYLOAD\" | jq -r ''.session_id // \"unknown\"'')\nCWD=$(echo \"$CLAUDE_HOOK_PAYLOAD\" | jq -r ''.cwd // \"unknown\"'')\n\necho \"[$TIMESTAMP] Tool: $TOOL_NAME | Session: $SESSION_ID | Dir: $CWD\" >> \"$LOG_FILE\"\nexit 0"
+    }
+  ]
+}',
+ 'seed_hook_003_audit_log',
  (SELECT id FROM users WHERE username = 'clodonic-system'),
- 0, 0, datetime('now', '-11 days'));
+ 0, 0, datetime('now', '-11 days')),
+
+('hook', 'Enforce Test-First Development',
+ 'PreToolUse hook that ensures tests exist before allowing code changes',
+ '{
+  "matcher": "Write|Edit|MultiEdit",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\n# Check if test file exists for source file\nFILE=$(echo \"$CLAUDE_HOOK_PAYLOAD\" | jq -r ''.file_path'')\n\n# Skip if editing test files themselves\nif [[ \"$FILE\" == *test* ]] || [[ \"$FILE\" == *spec* ]]; then\n  exit 0\nfi\n\n# Determine test file path\nTEST_FILE=\"\"\ncase \"$FILE\" in\n  *.py) TEST_FILE=\"${FILE%.py}_test.py\" ;;\n  *.js) TEST_FILE=\"${FILE%.js}.test.js\" ;;\n  *.ts) TEST_FILE=\"${FILE%.ts}.test.ts\" ;;\n  *) exit 0 ;; # Skip for other file types\nesac\n\n# Check if test exists\nif [[ ! -f \"$TEST_FILE\" ]]; then\n  echo \"❌ Test file required: $TEST_FILE\"\n  echo \"Create tests first (TDD)\"\n  exit 1\nfi\nexit 0"
+    }
+  ]
+}',
+ 'seed_hook_004_tdd_enforce',
+ (SELECT id FROM users WHERE username = 'clodonic-system'),
+ 2, 0, datetime('now', '-8 days')),
+
+('hook', 'Context Injection for Project Standards',
+ 'UserPromptSubmit hook that adds project context to every request',
+ '{
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\n# Inject project context if CLAUDE.md exists\nif [[ -f \"CLAUDE.md\" ]]; then\n  echo \"📋 Project context from CLAUDE.md loaded\"\n  cat CLAUDE.md\nfi\n\n# Add any runtime context\necho \"\"\necho \"📦 Current environment:\"\necho \"- Node version: $(node -v 2>/dev/null || echo ''N/A'')\"\necho \"- Python version: $(python --version 2>/dev/null || echo ''N/A'')\"\necho \"- Git branch: $(git branch --show-current 2>/dev/null || echo ''N/A'')\"\nexit 0"
+    }
+  ]
+}',
+ 'seed_hook_005_context_injection',
+ (SELECT id FROM users WHERE username = 'clodonic-system'),
+ 1, 0, datetime('now', '-5 days'));
 
 -- =====================================
 -- COMMAND PATTERNS
@@ -563,6 +549,30 @@ psql -c "SELECT query, calls, mean_exec_time, total_exec_time FROM pg_stat_state
  'seed_command_006_db_performance',
  (SELECT id FROM users WHERE username = 'clodonic-system'),
  0, 0, datetime('now', '-7 days'));
+
+-- =====================================
+-- METADATA FOR HOOKS
+-- =====================================
+
+INSERT INTO item_metadata (item_id, event_type, safety_level, dependencies)
+SELECT id, 'PreToolUse', 'read-only', '["jq"]'
+FROM items WHERE file_hash = 'seed_hook_001_prevent_dangerous';
+
+INSERT INTO item_metadata (item_id, event_type, safety_level, dependencies)
+SELECT id, 'PostToolUse', 'modifies-files', '["black", "prettier", "gofmt"]'
+FROM items WHERE file_hash = 'seed_hook_002_auto_format';
+
+INSERT INTO item_metadata (item_id, event_type, safety_level, dependencies)
+SELECT id, 'PostToolUse', 'read-only', '["jq"]'
+FROM items WHERE file_hash = 'seed_hook_003_audit_log';
+
+INSERT INTO item_metadata (item_id, event_type, safety_level, dependencies)
+SELECT id, 'PreToolUse', 'read-only', '["jq"]'
+FROM items WHERE file_hash = 'seed_hook_004_tdd_enforce';
+
+INSERT INTO item_metadata (item_id, event_type, safety_level, dependencies)
+SELECT id, 'UserPromptSubmit', 'read-only', '["git", "node", "python"]'
+FROM items WHERE file_hash = 'seed_hook_005_context_injection';
 
 -- =====================================
 -- TAG ASSOCIATIONS
@@ -652,23 +662,35 @@ SELECT
   (SELECT id FROM items WHERE file_hash = 'seed_prompt_004_user_story'),
   id FROM tags WHERE name IN ('planning', 'agile', 'frontend', 'backend', 'prompts');
 
--- Pre-commit Hook
+-- Prevent Dangerous Commands Hook
 INSERT INTO item_tags (item_id, tag_id)
 SELECT 
-  (SELECT id FROM items WHERE file_hash = 'seed_hook_001_precommit'),
-  id FROM tags WHERE name IN ('git', 'quality', 'automation', 'hooks', 'formatting', 'linting');
+  (SELECT id FROM items WHERE file_hash = 'seed_hook_001_prevent_dangerous'),
+  id FROM tags WHERE name IN ('hooks', 'security', 'safety', 'protection');
 
--- PR Description Generator
+-- Auto-Format Code Hook
 INSERT INTO item_tags (item_id, tag_id)
 SELECT 
-  (SELECT id FROM items WHERE file_hash = 'seed_hook_002_pr_description'),
-  id FROM tags WHERE name IN ('git', 'pr', 'automation', 'hooks');
+  (SELECT id FROM items WHERE file_hash = 'seed_hook_002_auto_format'),
+  id FROM tags WHERE name IN ('hooks', 'formatting', 'automation', 'quality');
 
--- Database Backup Hook
+-- Audit Log Hook
 INSERT INTO item_tags (item_id, tag_id)
 SELECT 
-  (SELECT id FROM items WHERE file_hash = 'seed_hook_003_db_backup'),
-  id FROM tags WHERE name IN ('database', 'backup', 'automation', 'hooks');
+  (SELECT id FROM items WHERE file_hash = 'seed_hook_003_audit_log'),
+  id FROM tags WHERE name IN ('hooks', 'logging', 'audit', 'automation');
+
+-- Test-First Development Hook
+INSERT INTO item_tags (item_id, tag_id)
+SELECT 
+  (SELECT id FROM items WHERE file_hash = 'seed_hook_004_tdd_enforce'),
+  id FROM tags WHERE name IN ('hooks', 'testing', 'tdd', 'quality');
+
+-- Context Injection Hook
+INSERT INTO item_tags (item_id, tag_id)
+SELECT 
+  (SELECT id FROM items WHERE file_hash = 'seed_hook_005_context_injection'),
+  id FROM tags WHERE name IN ('hooks', 'context', 'automation', 'workflow');
 
 -- Quick Project Setup Command
 INSERT INTO item_tags (item_id, tag_id)
