@@ -553,12 +553,13 @@ After installation:
 2. Continue session: \`claude --continue\`
 
 **How to use your new subagent:**
-- Claude will automatically delegate to this subagent when appropriate
-- You can also explicitly request: "use the ${agentName} agent to..."
+- Use the Task tool with \`subagent_type: "${agentName}"\` to invoke directly
+- Claude may also automatically delegate when the task matches the agent's description
 - The subagent operates in its own isolated context with specialized instructions
-- Check available agents with: \`/agents\` command
+- You can request: "use the ${agentName} agent to..." and Claude will use the Task tool
+- The agent will appear with its own color when invoked
 
-**This is a TRUE Claude Code subagent** that will be automatically invoked based on its description!
+**This is a TRUE Claude Code subagent** that can be invoked by name!
 
 Creating these files now...`;
 	}
