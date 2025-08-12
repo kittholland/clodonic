@@ -8,7 +8,8 @@ DELETE FROM items WHERE type = 'agent';
 INSERT INTO items (type, title, description, content, file_hash, submitter_id, votes_up, votes_down, created_at) VALUES
 ('agent', 'Multi-File Refactoring Assistant',
  'Helps refactor code across multiple files while maintaining consistency',
- 'name: multi-file-refactor
+ '---
+name: multi-file-refactor
 description: Assists with complex refactoring across multiple files
 tools: "*"
 ---
@@ -29,7 +30,8 @@ Always preserve functionality while improving structure.',
 
 ('agent', 'Database Migration Helper',
  'Assists with database schema changes and migration scripts',
- 'name: db-migration-helper
+ '---
+name: db-migration-helper
 description: Helps create and validate database migrations
 tools: "Read, Write, Bash"
 ---
@@ -50,7 +52,8 @@ Generate migration scripts that are safe and performant.',
 
 ('agent', 'API Documentation Generator',
  'Automatically generates comprehensive API documentation from code',
- 'name: api-documenter
+ '---
+name: api-documenter
 description: Creates OpenAPI/Swagger documentation from code
 tools: "Read, Write, Grep, Glob"
 ---
@@ -71,7 +74,8 @@ Include rate limiting information if present.',
 
 ('agent', 'Performance Profiler',
  'Identifies and fixes performance bottlenecks in applications',
- 'name: performance-profiler
+ '---
+name: performance-profiler
 description: Analyzes code for performance issues
 tools: "*"
 ---

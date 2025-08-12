@@ -11,18 +11,35 @@ export interface ValidationResult {
  */
 export function validateAgent(content: string): ValidationResult {
   try {
-    // Check if content has YAML frontmatter (markdown format) or is plain YAML
+    // Check if content starts with --- for proper YAML frontmatter
+    const startsWithFrontmatter = content.startsWith('---\n');
     const hasYamlFrontmatter = content.includes('\n---\n');
+    
+    // Agents should use markdown format with YAML frontmatter
+    if (!startsWithFrontmatter && hasYamlFrontmatter) {
+      return { 
+        valid: false, 
+        error: 'Agent must start with "---" for proper YAML frontmatter format' 
+      };
+    }
+    
     let yamlContent = content;
     let systemPrompt = '';
     
-    if (hasYamlFrontmatter) {
-      // Extract YAML frontmatter (everything before ---) 
-      const yamlEnd = content.indexOf('\n---');
+    if (startsWithFrontmatter && hasYamlFrontmatter) {
+      // Extract YAML frontmatter (everything between first --- and second ---) 
+      const yamlStart = 4; // After "---\n"
+      const yamlEnd = content.indexOf('\n---', yamlStart);
       if (yamlEnd !== -1) {
-        yamlContent = content.slice(0, yamlEnd);
+        yamlContent = content.slice(yamlStart, yamlEnd);
         systemPrompt = content.slice(content.indexOf('\n---\n') + 5).trim();
       }
+    } else if (startsWithFrontmatter && !hasYamlFrontmatter) {
+      // Invalid - starts with --- but no closing ---
+      return { 
+        valid: false, 
+        error: 'Agent YAML frontmatter must be closed with "---"' 
+      };
     }
     
     // Parse YAML
@@ -77,15 +94,16 @@ export function validateAgent(content: string): ValidationResult {
     }
     
     // System prompt or instructions validation
-    if (hasYamlFrontmatter) {
+    if (startsWithFrontmatter && hasYamlFrontmatter) {
       // Markdown format - check system prompt
       if (!systemPrompt) {
         warnings.push('System prompt appears to be empty');
       } else if (systemPrompt.length < 10) {
         warnings.push('System prompt is very short');
       }
-    } else {
-      // Plain YAML format - check for instructions field
+    } else if (!startsWithFrontmatter) {
+      // Plain YAML format (legacy) - check for instructions field
+      warnings.push('Consider using markdown format with YAML frontmatter (starting with ---) for proper Claude Code subagent support');
       if (!agent.instructions) {
         warnings.push('No instructions field found in agent YAML');
       } else if (typeof agent.instructions !== 'string') {
