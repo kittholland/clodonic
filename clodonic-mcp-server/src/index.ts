@@ -327,7 +327,7 @@ export class ClodonicMCP extends McpAgent {
 				break;
 
 			case "agent":
-				preview += `📁 Would create: .claude/agents/clodonic-${slug}.md\n`;
+				preview += `📁 Would create: .claude/agents/${slug}.md\n`;
 				preview += `📝 Would update: .claude/clodonic-manifest.json\n`;
 				preview += `⚠️ Restart required after installation\n`;
 				preview += `\n**Agent configuration:**\n\`\`\`yaml\n`;
@@ -335,7 +335,7 @@ export class ClodonicMCP extends McpAgent {
 				// Show parsed format
 				if (!pattern.content.includes('\n---\n')) {
 					// Parse and show what will be created
-					let parsedName = `clodonic-${slug}`;
+					let parsedName = slug;
 					let parsedDesc = pattern.description;
 					let parsedInstructions = '';
 					
@@ -381,9 +381,9 @@ export class ClodonicMCP extends McpAgent {
 				break;
 
 			case "command":
-				preview += `📁 Would create: .claude/commands/clodonic-${slug}.md\n`;
-				preview += `📝 Would update: .claude/claude.json\n`;
-				preview += `⚠️ Restart required after installation\n`;
+				preview += `📁 Would create: .claude/commands/${slug}.md\n`;
+				preview += `📝 Would update: .claude/clodonic-manifest.json\n`;
+				preview += `⚠️ Restart may be required for recognition\n`;
 				preview += `\n**Command content:**\n\`\`\`markdown\n`;
 				preview += pattern.content;
 				preview += `\n\`\`\``;
@@ -456,11 +456,11 @@ Updating CLAUDE.md now...`;
 	}
 
 	private generateAgentInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
-		const agentFile = `.claude/agents/clodonic-${slug}.md`;
+		const agentFile = `.claude/agents/${slug}.md`;
 		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [agentFile]);
 
 		// Parse agent content to extract name, description, and instructions
-		let agentName = `clodonic-${slug}`;
+		let agentName = slug;
 		let agentDescription = pattern.description;
 		let agentInstructions = pattern.content;
 		let agentTools = "*";
@@ -565,7 +565,7 @@ Creating these files now...`;
 	}
 
 	private generateCommandInstructions(pattern: Pattern, icon: string, slug: string, date: string): string {
-		const commandFile = `.claude/commands/clodonic-${slug}.md`;
+		const commandFile = `.claude/commands/${slug}.md`;
 		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [commandFile]);
 
 		const commandContent = `<!-- Clodonic Pattern: ${pattern.id} -->
@@ -590,8 +590,8 @@ File: \`.claude/clodonic-manifest.json\`
 ${manifestEntry}
 
 **Usage after installation:**
-- Use with: \`/clodonic-${slug}\` or \`/${slug}\`
-- Available immediately - no restart required
+- Use with: \`/${slug}\`
+- Note: May require restart for Claude Code to recognize the command
 - Supports \`$ARGUMENTS\` for parameters
 
 Creating these files now...`;
