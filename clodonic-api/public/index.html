@@ -578,7 +578,9 @@
         .pattern-preview pre {
             margin: 0;
             padding: 16px;
+            padding-right: 30px; /* Add extra padding to account for scrollbar */
             overflow-x: hidden;
+            overflow-y: auto;
             overflow-wrap: break-word;
             word-wrap: break-word;
             white-space: pre-wrap;
@@ -604,7 +606,7 @@
         .copy-btn {
             position: absolute;
             top: 12px;
-            right: 12px;
+            right: 28px; /* Move left to avoid scrollbar */
             padding: 6px 12px;
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
@@ -633,7 +635,7 @@
         .expand-btn {
             position: absolute;
             bottom: 12px;
-            right: 12px;
+            right: 28px; /* Move left to avoid scrollbar */
             padding: 6px 16px;
             background: rgba(255, 102, 0, 0.9);
             color: white;
