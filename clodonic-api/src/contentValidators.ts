@@ -88,53 +88,98 @@ export function validateAgent(content: string): ValidationResult {
 }
 
 /**
- * Validates Hook shell script syntax and safety
+ * Validates Claude Code hook JSON structure
  */
 export function validateHook(content: string): ValidationResult {
   const warnings: string[] = [];
   
-  // Basic shell syntax checks
-  const syntaxErrors: string[] = [];
-  
-  // Check for unmatched quotes
-  const singleQuotes = (content.match(/'/g) || []).length;
-  const doubleQuotes = (content.match(/"/g) || []).length;
-  
-  if (singleQuotes % 2 !== 0) {
-    syntaxErrors.push('Unmatched single quotes');
-  }
-  if (doubleQuotes % 2 !== 0) {
-    syntaxErrors.push('Unmatched double quotes'); 
+  // First, try to parse as JSON
+  let hookConfig: any;
+  try {
+    hookConfig = JSON.parse(content);
+  } catch (error) {
+    return { 
+      valid: false, 
+      error: 'Invalid JSON format. Hooks must be valid JSON configurations for Claude Code settings.json' 
+    };
   }
   
-  // Check for unmatched brackets/parentheses
-  const opens = (content.match(/\(/g) || []).length;
-  const closes = (content.match(/\)/g) || []).length;
-  if (opens !== closes) {
-    syntaxErrors.push('Unmatched parentheses');
+  // Validate hook structure
+  if (!hookConfig.hooks || !Array.isArray(hookConfig.hooks)) {
+    return { 
+      valid: false, 
+      error: 'Hook must have a "hooks" array containing hook configurations' 
+    };
   }
   
-  // Check for hanging operators
-  if (/\|\s*$|&&\s*$|\|\|\s*$/.test(content)) {
-    syntaxErrors.push('Hanging pipe or logical operator');
+  // Check each hook in the array
+  for (const hook of hookConfig.hooks) {
+    if (!hook.type) {
+      return { 
+        valid: false, 
+        error: 'Each hook must have a "type" field (usually "command")' 
+      };
+    }
+    
+    if (hook.type === 'command' && !hook.command) {
+      return { 
+        valid: false, 
+        error: 'Command-type hooks must have a "command" field' 
+      };
+    }
   }
   
-  if (syntaxErrors.length > 0) {
-    return { valid: false, error: `Shell syntax errors: ${syntaxErrors.join(', ')}` };
+  // Validate matcher if present (for PreToolUse/PostToolUse hooks)
+  if (hookConfig.matcher) {
+    // Matcher should be a tool name or regex pattern
+    if (typeof hookConfig.matcher !== 'string') {
+      warnings.push('Matcher should be a string (tool name or regex pattern)');
+    }
+    
+    // Common matchers
+    const validMatchers = ['Bash', 'Write', 'Edit', 'MultiEdit', 'Read', 'Grep', 'Glob', '*'];
+    const matcherPattern = hookConfig.matcher;
+    
+    // Check if it's a valid tool pattern
+    if (!validMatchers.includes(matcherPattern) && !matcherPattern.includes('|')) {
+      warnings.push(`Unusual matcher pattern: "${matcherPattern}". Common patterns: Bash, Write|Edit|MultiEdit, *`);
+    }
   }
   
-  // Best practice warnings
-  if (!content.includes('#!/bin/bash') && !content.includes('#!/bin/sh')) {
-    warnings.push('Missing shebang line');
+  // Check for metadata hints in description (not part of JSON but helpful)
+  const contentLower = content.toLowerCase();
+  let suggestedEventType = null;
+  
+  if (contentLower.includes('pretooluse') || contentLower.includes('before')) {
+    suggestedEventType = 'PreToolUse';
+  } else if (contentLower.includes('posttooluse') || contentLower.includes('after')) {
+    suggestedEventType = 'PostToolUse';
+  } else if (contentLower.includes('userpromptsubmit') || contentLower.includes('prompt')) {
+    suggestedEventType = 'UserPromptSubmit';
   }
   
-  if (content.includes('$1') && !content.includes('$@') && !content.includes('"$1"')) {
-    warnings.push('Unquoted variable usage - consider using "$1"');
+  if (suggestedEventType && hookConfig.matcher) {
+    warnings.push(`This appears to be a ${suggestedEventType} hook based on content`);
   }
   
-  // Exit code validation for Claude Code hooks
-  if (!content.includes('exit ')) {
-    warnings.push('Hook should explicitly exit with status code (exit 0 for success, exit 2 to block)');
+  // Validate command scripts if present
+  for (const hook of hookConfig.hooks) {
+    if (hook.type === 'command' && hook.command) {
+      // Check for common issues in the command script
+      const cmd = hook.command;
+      
+      if (!cmd.includes('#!/bin/bash') && !cmd.includes('#!/bin/sh')) {
+        warnings.push('Command script should start with a shebang (#!/bin/bash)');
+      }
+      
+      if (!cmd.includes('exit ')) {
+        warnings.push('Hook command should explicitly exit with status code (exit 0 for success, exit 1 to block)');
+      }
+      
+      if (cmd.includes('$CLAUDE_HOOK_PAYLOAD') && !cmd.includes('jq')) {
+        warnings.push('Consider using jq to parse $CLAUDE_HOOK_PAYLOAD JSON');
+      }
+    }
   }
   
   return { valid: true, warnings: warnings.length > 0 ? warnings : undefined };
