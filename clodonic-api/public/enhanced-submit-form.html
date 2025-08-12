@@ -1,0 +1,334 @@
+<!-- Enhanced metadata form sections to add to submit.html -->
+
+<!-- For HOOKS -->
+<div class="pattern-metadata" id="hook-metadata" style="display: none;">
+    <h3>Hook Configuration</h3>
+    
+    <div class="form-group">
+        <label>Event Type <span class="required">*</span></label>
+        <select id="hook-event-type" required>
+            <option value="">Select when this hook runs...</option>
+            <option value="PreToolUse">PreToolUse - Before any tool is used</option>
+            <option value="PostToolUse">PostToolUse - After any tool is used</option>
+            <option value="UserPromptSubmit">UserPromptSubmit - When user submits a prompt</option>
+            <option value="SessionStart">SessionStart - When session begins</option>
+            <option value="Stop">Stop - When stopping execution</option>
+        </select>
+        <div class="help-text">When should this hook be triggered?</div>
+    </div>
+    
+    <div class="form-group">
+        <label>Matcher Pattern</label>
+        <input type="text" id="hook-matcher" placeholder="e.g., Bash, Edit, or * for all">
+        <div class="help-text">Which tools should trigger this hook? (extracted from JSON)</div>
+    </div>
+    
+    <div class="form-group">
+        <label>Safety Level</label>
+        <div class="radio-group">
+            <label><input type="radio" name="hook-safety" value="safe" checked> Safe - Read-only checks</label>
+            <label><input type="radio" name="hook-safety" value="moderate"> Moderate - May block actions</label>
+            <label><input type="radio" name="hook-safety" value="dangerous"> Dangerous - Modifies behavior significantly</label>
+        </div>
+    </div>
+</div>
+
+<!-- For AGENTS -->
+<div class="pattern-metadata" id="agent-metadata" style="display: none;">
+    <h3>Agent Configuration</h3>
+    
+    <div class="form-group">
+        <label>Required Tools</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="agent-tools" value="Read"> Read</label>
+            <label><input type="checkbox" name="agent-tools" value="Write"> Write</label>
+            <label><input type="checkbox" name="agent-tools" value="Edit"> Edit</label>
+            <label><input type="checkbox" name="agent-tools" value="Bash"> Bash</label>
+            <label><input type="checkbox" name="agent-tools" value="Grep"> Grep</label>
+            <label><input type="checkbox" name="agent-tools" value="Task"> Task</label>
+            <label><input type="checkbox" name="agent-tools" value="all" checked> All tools (*)</label>
+        </div>
+        <div class="help-text">Which tools does this agent need? (extracted from YAML)</div>
+    </div>
+    
+    <div class="form-group">
+        <label>Preferred Model</label>
+        <select id="agent-model">
+            <option value="">No preference</option>
+            <option value="haiku">Haiku - Fast, lightweight tasks</option>
+            <option value="sonnet">Sonnet - Balanced performance</option>
+            <option value="opus">Opus - Complex reasoning</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label>Auto-delegation Keywords</label>
+        <input type="text" id="agent-keywords" placeholder="e.g., refactor, migrate, optimize">
+        <div class="help-text">Keywords that should trigger automatic delegation to this agent</div>
+    </div>
+</div>
+
+<!-- For COMMANDS -->
+<div class="pattern-metadata" id="command-metadata" style="display: none;">
+    <h3>Command Configuration</h3>
+    
+    <div class="form-group">
+        <label>Supports Arguments?</label>
+        <div class="radio-group">
+            <label><input type="radio" name="command-args" value="yes"> Yes - Uses $ARGUMENTS</label>
+            <label><input type="radio" name="command-args" value="no" checked> No - Fixed command</label>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Required Environment</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="command-env" value="node"> Node.js/npm</label>
+            <label><input type="checkbox" name="command-env" value="docker"> Docker</label>
+            <label><input type="checkbox" name="command-env" value="python"> Python</label>
+            <label><input type="checkbox" name="command-env" value="git"> Git</label>
+            <label><input type="checkbox" name="command-env" value="none" checked> No special requirements</label>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Tool Restrictions</label>
+        <input type="text" id="command-allowed-tools" placeholder="e.g., Bash(npm:*), Read">
+        <div class="help-text">Limit which tools can be used (optional)</div>
+    </div>
+</div>
+
+<!-- For CLAUDE.md -->
+<div class="pattern-metadata" id="claude_md-metadata" style="display: none;">
+    <h3>Project Configuration</h3>
+    
+    <div class="form-group">
+        <label>Tech Stack</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="claude-stack" value="react"> React</label>
+            <label><input type="checkbox" name="claude-stack" value="nextjs"> Next.js</label>
+            <label><input type="checkbox" name="claude-stack" value="node"> Node.js</label>
+            <label><input type="checkbox" name="claude-stack" value="python"> Python</label>
+            <label><input type="checkbox" name="claude-stack" value="typescript"> TypeScript</label>
+            <label><input type="checkbox" name="claude-stack" value="docker"> Docker</label>
+            <label><input type="checkbox" name="claude-stack" value="other"> Other</label>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Project Complexity</label>
+        <select id="claude-complexity">
+            <option value="simple">Simple - Single file/module</option>
+            <option value="medium">Medium - Multiple modules</option>
+            <option value="complex">Complex - Full application</option>
+            <option value="enterprise">Enterprise - Large scale system</option>
+        </select>
+    </div>
+</div>
+
+<!-- For PROMPTS -->
+<div class="pattern-metadata" id="prompt-metadata" style="display: none;">
+    <h3>Prompt Details</h3>
+    
+    <div class="form-group">
+        <label>Use Case Category</label>
+        <select id="prompt-category">
+            <option value="">Select category...</option>
+            <option value="architecture">Architecture & Design</option>
+            <option value="debugging">Debugging & Troubleshooting</option>
+            <option value="refactoring">Refactoring & Optimization</option>
+            <option value="testing">Testing & QA</option>
+            <option value="documentation">Documentation</option>
+            <option value="learning">Learning & Exploration</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label>Tested & Verified?</label>
+        <div class="radio-group">
+            <label><input type="radio" name="prompt-tested" value="yes"> Yes - Used successfully</label>
+            <label><input type="radio" name="prompt-tested" value="no" checked> No - Theoretical</label>
+        </div>
+    </div>
+</div>
+
+<style>
+.pattern-metadata {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.pattern-metadata h3 {
+    margin-top: 0;
+    color: #495057;
+    font-size: 18px;
+    border-bottom: 2px solid #ff6600;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.checkbox-group label, .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkbox-group input, .radio-group input {
+    cursor: pointer;
+}
+
+select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+}
+</style>
+
+<script>
+// Show pattern-specific metadata form based on selected type
+function showPatternMetadata(type) {
+    // Hide all metadata sections
+    document.querySelectorAll('.pattern-metadata').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show relevant section
+    const metadataSection = document.getElementById(`${type}-metadata`);
+    if (metadataSection) {
+        metadataSection.style.display = 'block';
+        
+        // Try to extract metadata from content
+        extractPatternMetadata(type);
+    }
+}
+
+function extractPatternMetadata(type) {
+    const content = document.getElementById('content').value;
+    
+    switch(type) {
+        case 'hook':
+            try {
+                const hookConfig = JSON.parse(content);
+                // Extract matcher
+                if (hookConfig.matcher) {
+                    document.getElementById('hook-matcher').value = hookConfig.matcher;
+                }
+                // Try to guess event type from content
+                if (content.toLowerCase().includes('pretool')) {
+                    document.getElementById('hook-event-type').value = 'PreToolUse';
+                }
+            } catch(e) {}
+            break;
+            
+        case 'agent':
+            // Extract tools from YAML
+            const toolsMatch = content.match(/tools:\s*["']?([^"'\n]+)["']?/);
+            if (toolsMatch) {
+                const tools = toolsMatch[1];
+                if (tools === '*') {
+                    document.querySelector('input[name="agent-tools"][value="all"]').checked = true;
+                } else {
+                    // Parse individual tools
+                    tools.split(',').forEach(tool => {
+                        const checkbox = document.querySelector(`input[name="agent-tools"][value="${tool.trim()}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+            }
+            break;
+            
+        case 'command':
+            // Check for $ARGUMENTS
+            if (content.includes('$ARGUMENTS')) {
+                document.querySelector('input[name="command-args"][value="yes"]').checked = true;
+            }
+            // Check for environment requirements
+            if (content.includes('docker')) {
+                document.querySelector('input[name="command-env"][value="docker"]').checked = true;
+            }
+            if (content.includes('npm') || content.includes('node')) {
+                document.querySelector('input[name="command-env"][value="node"]').checked = true;
+            }
+            break;
+    }
+}
+
+// Enhance form submission to include metadata
+function enhanceFormData(formData) {
+    const type = formData.type;
+    const metadata = {};
+    
+    switch(type) {
+        case 'hook':
+            metadata.eventType = document.getElementById('hook-event-type').value;
+            metadata.matcher = document.getElementById('hook-matcher').value;
+            metadata.safety = document.querySelector('input[name="hook-safety"]:checked').value;
+            break;
+            
+        case 'agent':
+            metadata.tools = Array.from(document.querySelectorAll('input[name="agent-tools"]:checked'))
+                .map(cb => cb.value);
+            metadata.model = document.getElementById('agent-model').value;
+            metadata.keywords = document.getElementById('agent-keywords').value.split(',')
+                .map(k => k.trim()).filter(k => k);
+            break;
+            
+        case 'command':
+            metadata.supportsArgs = document.querySelector('input[name="command-args"]:checked').value === 'yes';
+            metadata.environment = Array.from(document.querySelectorAll('input[name="command-env"]:checked'))
+                .map(cb => cb.value);
+            metadata.allowedTools = document.getElementById('command-allowed-tools').value;
+            break;
+            
+        case 'claude_md':
+            metadata.stack = Array.from(document.querySelectorAll('input[name="claude-stack"]:checked'))
+                .map(cb => cb.value);
+            metadata.complexity = document.getElementById('claude-complexity').value;
+            break;
+            
+        case 'prompt':
+            metadata.category = document.getElementById('prompt-category').value;
+            metadata.tested = document.querySelector('input[name="prompt-tested"]:checked').value === 'yes';
+            break;
+    }
+    
+    // Add metadata to form data
+    formData.metadata = metadata;
+    
+    // For hooks, modify the content to include event type if not present
+    if (type === 'hook' && metadata.eventType) {
+        try {
+            const hookConfig = JSON.parse(formData.content);
+            hookConfig.eventType = metadata.eventType; // Add to JSON
+            formData.content = JSON.stringify(hookConfig, null, 2);
+        } catch(e) {
+            // If not JSON, prepend as comment
+            formData.content = `# Event: ${metadata.eventType}\n${formData.content}`;
+        }
+    }
+    
+    return formData;
+}
+</script>

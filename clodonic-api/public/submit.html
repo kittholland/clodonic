@@ -496,6 +496,115 @@
             color: #d32f2f;
         }
         
+        /* Format Helper Styles */
+        .format-helper {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .format-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .format-tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .format-tab:hover {
+            color: #ff6600;
+        }
+
+        .format-tab.active {
+            color: #ff6600;
+            border-bottom-color: #ff6600;
+            font-weight: 600;
+        }
+
+        .format-panel {
+            display: none;
+        }
+
+        .format-panel.active {
+            display: block;
+        }
+
+        .format-panel h4 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .format-panel p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .format-panel code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .format-panel pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            margin: 12px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .format-panel pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .copy-template-btn {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .copy-template-btn:hover {
+            background: #e55500;
+        }
+
+        .copy-template-btn.copied {
+            background: #4caf50;
+        }
+
         /* Mobile styles */
         @media (max-width: 768px) {
             header {
@@ -640,6 +749,95 @@
             <a class="paste-link" id="paste-toggle">Paste content manually</a>
         </div>
 
+        <!-- Format Helper Templates -->
+        <div class="format-helper" id="format-helper">
+            <h3 style="font-size: 18px; margin-bottom: 16px;">📋 Format Templates</h3>
+            
+            <div class="format-tabs">
+                <button class="format-tab active" data-type="agent">🤖 Agent</button>
+                <button class="format-tab" data-type="command">⚡ Command</button>
+                <button class="format-tab" data-type="hook">🪝 Hook</button>
+                <button class="format-tab" data-type="claude_md">📝 CLAUDE.md</button>
+                <button class="format-tab" data-type="prompt">💬 Prompt</button>
+            </div>
+            
+            <div class="format-content">
+                <div class="format-panel active" data-type="agent">
+                    <h4>Agent Format (Subagent)</h4>
+                    <p>Location: <code>~/.claude/agents/*.md</code></p>
+                    <pre><code>---
+name: your-agent-name
+description: When this agent should be used
+tools: "*"  # or "Read, Write, Bash"
+---
+
+You are a specialized agent for...
+Instructions go here...</code></pre>
+                    <button class="copy-template-btn" data-template="agent">Copy Template</button>
+                </div>
+                
+                <div class="format-panel" data-type="command">
+                    <h4>Command Format (Slash Command)</h4>
+                    <p>Location: <code>~/.claude/commands/*.md</code></p>
+                    <pre><code># Description of what this command does
+npm install && npm run dev
+
+# Can include multiple commands
+docker-compose up -d</code></pre>
+                    <button class="copy-template-btn" data-template="command">Copy Template</button>
+                </div>
+                
+                <div class="format-panel" data-type="hook">
+                    <h4>Hook Format (Event Hook)</h4>
+                    <p>Location: Inside <code>~/.claude/settings.json</code></p>
+                    <p style="background: #fff5f0; padding: 8px 12px; border-left: 3px solid #ff6600; border-radius: 4px; color: #d84315;">⚠️ Extract just the hook configuration object:</p>
+                    <pre><code>{
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\necho \"Hook running\"\nexit 0"
+    }
+  ]
+}</code></pre>
+                    <button class="copy-template-btn" data-template="hook">Copy Template</button>
+                </div>
+                
+                <div class="format-panel" data-type="claude_md">
+                    <h4>CLAUDE.md Format</h4>
+                    <p>Location: Project root <code>CLAUDE.md</code></p>
+                    <pre><code># Project Name
+
+## Tech Stack
+- Framework: Next.js
+- Database: PostgreSQL
+
+## Commands
+```bash
+npm run dev  # Start development
+npm test     # Run tests
+```
+
+## Guidelines
+- Follow TypeScript best practices
+- Use functional components</code></pre>
+                    <button class="copy-template-btn" data-template="claude_md">Copy Template</button>
+                </div>
+                
+                <div class="format-panel" data-type="prompt">
+                    <h4>Prompt Format</h4>
+                    <p>Instructional methodology for Claude</p>
+                    <pre><code>When implementing authentication:
+1. Start with the user model
+2. Set up session management
+3. Implement OAuth providers
+4. Add rate limiting
+5. Test security thoroughly</code></pre>
+                    <button class="copy-template-btn" data-template="prompt">Copy Template</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Manual Entry (hidden by default) -->
         <div class="manual-entry" id="manual-entry">
             <div class="form-section active">
@@ -690,6 +888,23 @@
                 <label>Pattern Preview</label>
                 <div class="code-preview" id="content-preview"></div>
                 <div class="help-text">This is what will be stored as your pattern</div>
+            </div>
+            
+            <!-- Hook-specific metadata -->
+            <div class="form-group" id="hook-metadata" style="display: none;">
+                <label for="hook-event-type">Hook Event Type <span class="required">*</span></label>
+                <select id="hook-event-type" required>
+                    <option value="">Select when this hook runs...</option>
+                    <option value="PreToolUse">PreToolUse - Before any tool is used</option>
+                    <option value="PostToolUse">PostToolUse - After tool completion</option>
+                    <option value="UserPromptSubmit">UserPromptSubmit - When user submits prompt</option>
+                    <option value="Stop">Stop - When main agent finishes responding</option>
+                    <option value="SubagentStop">SubagentStop - When subagent finishes</option>
+                    <option value="SessionStart">SessionStart - When starting/resuming session</option>
+                    <option value="PreCompact">PreCompact - Before context compaction</option>
+                    <option value="Notification">Notification - Tool permission/idle prompts</option>
+                </select>
+                <div class="help-text">This determines when your hook will be triggered in Claude Code</div>
             </div>
             
             <form id="submit-form">
@@ -995,6 +1210,27 @@
             const preview = fileContent.substring(0, 500);
             document.getElementById('content-preview').textContent = 
                 preview + (fileContent.length > 500 ? '\n...\n[truncated]' : '');
+            
+            // Show/hide hook-specific metadata
+            const hookMetadata = document.getElementById('hook-metadata');
+            if (selectedType === 'hook') {
+                hookMetadata.style.display = 'block';
+                document.getElementById('hook-event-type').required = true;
+                
+                // Try to extract event type from hook content
+                try {
+                    const hookConfig = JSON.parse(fileContent);
+                    // Check if eventType is in the JSON
+                    if (hookConfig.eventType) {
+                        document.getElementById('hook-event-type').value = hookConfig.eventType;
+                    }
+                } catch (e) {
+                    // Not JSON or parsing failed
+                }
+            } else {
+                hookMetadata.style.display = 'none';
+                document.getElementById('hook-event-type').required = false;
+            }
             
             // Auto-suggest tags based on content and type
             const suggestedTags = autoSuggestTags(fileContent, selectedType, fileName);
@@ -1336,6 +1572,18 @@
                 return;
             }
             
+            // Validate hook event type if it's a hook
+            let metadata = {};
+            if (selectedType === 'hook') {
+                const eventType = document.getElementById('hook-event-type').value;
+                if (!eventType) {
+                    showMessage('error', 'Please select a hook event type');
+                    document.getElementById('hook-event-type').focus();
+                    return;
+                }
+                metadata.eventType = eventType;
+            }
+            
             try {
                 const response = await fetch('/api/items', {
                     method: 'POST',
@@ -1345,7 +1593,8 @@
                         title,
                         description,
                         content: fileContent,
-                        tags
+                        tags,
+                        metadata
                     })
                 });
                 
@@ -1466,6 +1715,114 @@
         
         // Check auth status (but don't block submission)
         checkAuth();
+
+        // Format Helper Templates
+        const templates = {
+            agent: `---
+name: my-agent
+description: Helps with specific tasks
+tools: "*"
+---
+
+You are a specialized agent for Claude Code.
+
+Your responsibilities:
+- Task 1
+- Task 2
+
+Always follow best practices.`,
+
+            command: `# Quick setup for development
+npm install && npm run dev
+
+# Or use for Docker environments
+# docker-compose up -d`,
+
+            hook: `{
+  "matcher": "Bash",
+  "hooks": [
+    {
+      "type": "command",
+      "command": "#!/bin/bash\\n# Your hook logic here\\nexit 0"
+    }
+  ]
+}`,
+
+            claude_md: `# Project Name
+
+## Tech Stack
+- Framework: 
+- Database: 
+- Language: 
+
+## Commands
+\`\`\`bash
+npm run dev
+npm test
+\`\`\`
+
+## Guidelines
+- Key principle 1
+- Key principle 2`,
+
+            prompt: `When tackling [problem type]:
+
+1. First step
+2. Second step
+3. Third step
+
+Key considerations:
+- Point 1
+- Point 2`
+        };
+
+        // Format tab switching
+        document.querySelectorAll('.format-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const type = tab.dataset.type;
+                
+                // Update active tab
+                document.querySelectorAll('.format-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active panel
+                document.querySelectorAll('.format-panel').forEach(p => p.classList.remove('active'));
+                document.querySelector(`.format-panel[data-type="${type}"]`).classList.add('active');
+            });
+        });
+
+        // Copy template buttons
+        document.querySelectorAll('.copy-template-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const template = templates[btn.dataset.template];
+                navigator.clipboard.writeText(template).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = '✓ Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = original;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                    
+                    // Also populate the manual entry if visible
+                    if (document.getElementById('manual-entry').classList.contains('active')) {
+                        document.getElementById('manual-content').value = template;
+                        // Set the type to match the template
+                        document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+                        const typeOption = document.querySelector(`.type-option[data-type="${btn.dataset.template}"]`);
+                        if (typeOption) {
+                            typeOption.classList.add('selected');
+                            selectedType = btn.dataset.template;
+                        }
+                        updateManualCharCounter();
+                    }
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    btn.textContent = 'Copy failed';
+                    setTimeout(() => btn.textContent = 'Copy Template', 2000);
+                });
+            });
+        });
     </script>
 </body>
 </html>

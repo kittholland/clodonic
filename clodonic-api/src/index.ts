@@ -76,11 +76,15 @@ app.get('/api/items', async (c) => {
   let query = `
     SELECT i.*, 
            u.username as submitter_name,
-           GROUP_CONCAT(DISTINCT t.name) as tag_names${currentUserId ? ',\n           v.vote as user_vote' : ''}
+           GROUP_CONCAT(DISTINCT t.name) as tag_names,
+           m.event_type,
+           m.tools_required,
+           m.command_trigger${currentUserId ? ',\n           v.vote as user_vote' : ''}
     FROM items i
     LEFT JOIN users u ON i.submitter_id = u.id
     LEFT JOIN item_tags it ON i.id = it.item_id
-    LEFT JOIN tags t ON it.tag_id = t.id${currentUserId ? '\n    LEFT JOIN votes v ON i.id = v.item_id AND v.user_id = ?' : ''}
+    LEFT JOIN tags t ON it.tag_id = t.id
+    LEFT JOIN item_metadata m ON i.id = m.item_id${currentUserId ? '\n    LEFT JOIN votes v ON i.id = v.item_id AND v.user_id = ?' : ''}
   `;
   
   const conditions: string[] = [];
@@ -159,12 +163,17 @@ app.get('/api/items', async (c) => {
     });
   }
   
-  // Parse tag names and include vote status
+  // Parse tag names and include vote status and metadata
   const items = result.results?.map((item: any) => ({
     ...item,
     tags: item.tag_names ? item.tag_names.split(',') : [],
     submitter_name: item.submitter_name || 'anonymous',
-    user_voted: item.user_vote === 1 // true if user voted up, false otherwise
+    user_voted: item.user_vote === 1, // true if user voted up, false otherwise
+    metadata: {
+      eventType: item.event_type,
+      toolsRequired: item.tools_required ? JSON.parse(item.tools_required) : null,
+      commandTrigger: item.command_trigger
+    }
   })) || [];
   
   return c.json({
@@ -189,6 +198,11 @@ app.get('/api/items/:id', async (c) => {
     return c.json({ error: 'Item not found' }, 404);
   }
   
+  // Get metadata
+  const metadata = await c.env.DB.prepare(
+    'SELECT * FROM item_metadata WHERE item_id = ?'
+  ).bind(id).first();
+  
   // Get tags
   const tags = await c.env.DB.prepare(`
     SELECT t.name, t.category 
@@ -209,7 +223,12 @@ app.get('/api/items/:id', async (c) => {
   return c.json({
     ...item,
     tags: tags.results,
-    user_voted: userVoted
+    user_voted: userVoted,
+    metadata: metadata ? {
+      eventType: metadata.event_type,
+      toolsRequired: metadata.tools_required ? JSON.parse(metadata.tools_required) : null,
+      commandTrigger: metadata.command_trigger
+    } : null
   });
 });
 
@@ -243,7 +262,7 @@ app.post('/api/items',
     return c.json({ error: validation.error }, 400);
   }
   
-  const { type, title, description, content, tags } = validation.data;
+  const { type, title, description, content, tags, metadata } = validation.data;
   
   // Get user from session if authenticated
   const session = await getUserFromRequest(c);
@@ -328,6 +347,31 @@ app.post('/api/items',
   ]);
   
   const itemId = tx[0].meta.last_row_id;
+  
+  // Save metadata if provided (especially critical for hooks)
+  if (metadata && Object.keys(metadata).length > 0) {
+    // For hooks, eventType is critical
+    if (type === 'hook' && metadata.eventType) {
+      await c.env.DB.prepare(
+        'INSERT INTO item_metadata (item_id, event_type) VALUES (?, ?)'
+      ).bind(itemId, metadata.eventType).run();
+      logger.info('Hook metadata saved', { itemId, eventType: metadata.eventType });
+    }
+    
+    // For agents, save tools requirement
+    if (type === 'agent' && metadata.tools) {
+      await c.env.DB.prepare(
+        'INSERT INTO item_metadata (item_id, tools_required) VALUES (?, ?)'
+      ).bind(itemId, JSON.stringify(metadata.tools)).run();
+    }
+    
+    // For commands, save argument support
+    if (type === 'command' && metadata.supportsArgs !== undefined) {
+      await c.env.DB.prepare(
+        'INSERT INTO item_metadata (item_id, command_trigger) VALUES (?, ?)'
+      ).bind(itemId, metadata.supportsArgs ? 'arguments' : 'fixed').run();
+    }
+  }
   
   // Handle tags - validate against curated list only
   if (tags.length > 0) {

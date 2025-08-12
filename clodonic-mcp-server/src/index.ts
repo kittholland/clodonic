@@ -16,6 +16,13 @@ interface Pattern {
 	submitter_name: string;
 	created_at: string;
 	tags: any[]; // Can be strings or objects
+	metadata?: {
+		eventType?: string;
+		toolsRequired?: string[];
+		commandTrigger?: string;
+	};
+	has_warnings?: number; // 1 if has warnings, 0 or null if not
+	warning_flags?: string; // JSON array of warning messages
 }
 
 // Icons for visual hierarchy
@@ -99,8 +106,9 @@ export class ClodonicMCP extends McpAgent {
 							const votes = p.votes_up - p.votes_down;
 							const tags = this.formatTags(p.tags);
 							const slug = this.slugify(p.title);
+							const warningIndicator = p.has_warnings ? " ⚠️" : "";
 
-							return `${icon} **${p.title}**\n   Author: @${author} | Type: ${p.type} | ⭐ ${votes} votes\n   ${p.description}${tags ? `\n   Tags: ${tags}` : ""}\n   💬 Install: \`install pattern ${p.id} from clodonic\` or use slug: ${slug}`;
+							return `${icon} **${p.title}${warningIndicator}**\n   Author: @${author} | Type: ${p.type} | ⭐ ${votes} votes${p.has_warnings ? " | ⚠️ Has warnings" : ""}\n   ${p.description}${tags ? `\n   Tags: ${tags}` : ""}\n   💬 Install: \`install pattern ${p.id} from clodonic\` or use slug: ${slug}`;
 						})
 						.join("\n\n");
 
@@ -164,12 +172,16 @@ export class ClodonicMCP extends McpAgent {
 					const tags = this.formatTags(pattern.tags);
 					const slug = this.slugify(pattern.title);
 
+					// Add warning indicator if present
+					const warningIndicator = pattern.has_warnings ? " ⚠️" : "";
+					
 					const info = [
-						`${icon} **${pattern.title}** (ID: ${pattern.id})`,
+						`${icon} **${pattern.title}${warningIndicator}** (ID: ${pattern.id})`,
 						`Author: @${author} | Type: ${pattern.type}`,
 						`Votes: ⭐ ${votes} (${pattern.votes_up} up, ${pattern.votes_down} down)`,
 						`Created: ${new Date(pattern.created_at).toLocaleDateString()}`,
 						tags ? `Tags: ${tags}` : "",
+						pattern.has_warnings ? `⚠️ **WARNING**: This pattern has security warnings` : "",
 						`\nDescription: ${pattern.description}`,
 						`\n**Content Preview:**`,
 						`\`\`\`${this.getLanguageForType(pattern.type)}`,
@@ -277,13 +289,29 @@ export class ClodonicMCP extends McpAgent {
 		const slug = this.slugify(pattern.title);
 		const author = pattern.submitter_name || "Anonymous";
 		const date = new Date().toISOString().split("T")[0];
+		
+		// Parse and display warnings if present
+		let warningMessage = "";
+		if (pattern.has_warnings && pattern.warning_flags) {
+			try {
+				const warnings = JSON.parse(pattern.warning_flags);
+				warningMessage = `\n⚠️ **SECURITY WARNING** ⚠️\nThis pattern has been flagged with the following warnings:\n`;
+				warnings.forEach((warning: string) => {
+					warningMessage += `• ${warning}\n`;
+				});
+				warningMessage += `\n**Please review the pattern carefully before installation.**\n\n`;
+			} catch (e) {
+				warningMessage = `\n⚠️ **WARNING**: This pattern has security warnings. Review carefully before use.\n\n`;
+			}
+		}
 
 		if (dryRun) {
-			return this.generateDryRunPreview(pattern, icon, slug, author, date, strategy);
+			return warningMessage + this.generateDryRunPreview(pattern, icon, slug, author, date, strategy);
 		}
 
 		// Generate type-specific installation instructions
-		switch (pattern.type) {
+		const instructions = (() => {
+			switch (pattern.type) {
 			case "prompt":
 				return this.generatePromptInstructions(pattern, icon, slug);
 
@@ -301,7 +329,10 @@ export class ClodonicMCP extends McpAgent {
 
 			default:
 				return `❌ Unknown pattern type: ${pattern.type}`;
-		}
+			}
+		})();
+		
+		return warningMessage + instructions;
 	}
 
 	private generateDryRunPreview(
@@ -656,7 +687,12 @@ Updating settings file now...`;
 	}
 
 	private extractHookType(pattern: Pattern): string {
-		// Try to extract from description or content
+		// Use metadata if available (most reliable)
+		if (pattern.metadata?.eventType) {
+			return pattern.metadata.eventType;
+		}
+		
+		// Fallback: Try to extract from description or content
 		const description = pattern.description.toLowerCase();
 		const content = pattern.content.toLowerCase();
 		

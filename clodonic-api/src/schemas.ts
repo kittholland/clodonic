@@ -12,6 +12,29 @@ const CONTENT_LIMITS = {
   command: 2048,     // 2KB
 } as const;
 
+// Metadata schema for pattern-specific properties
+export const MetadataSchema = z.object({
+  // Hook-specific
+  eventType: z.enum([
+    'PreToolUse', 
+    'PostToolUse', 
+    'UserPromptSubmit', 
+    'Stop', 
+    'SubagentStop', 
+    'SessionStart', 
+    'PreCompact', 
+    'Notification'
+  ]).optional(),
+  
+  // Agent-specific
+  tools: z.array(z.string()).optional(),
+  model: z.string().optional(),
+  
+  // Command-specific
+  supportsArgs: z.boolean().optional(),
+  environment: z.array(z.string()).optional(),
+}).optional();
+
 // Base submission schema
 export const SubmissionSchema = z.object({
   type: z.enum(CONTENT_TYPES, {
@@ -35,7 +58,9 @@ export const SubmissionSchema = z.object({
   
   tags: z.array(z.string().trim().min(1).max(50))
     .max(5, 'Maximum 5 tags allowed')
-    .default([])
+    .default([]),
+  
+  metadata: MetadataSchema
 });
 
 // Runtime content validation by type

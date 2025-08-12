@@ -497,6 +497,40 @@
             cursor: help;
         }
         
+        .warning-banner {
+            background: linear-gradient(135deg, #fff5f0 0%, #ffebe0 100%);
+            border: 1px solid #ff9800;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin: 12px 0;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            font-size: 13px;
+            color: #e65100;
+        }
+        
+        .warning-banner .warning-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .warning-banner .warning-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+        
+        .warning-banner .warning-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #d84315;
+        }
+        
+        .pattern-card.has-warnings {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fffaf8 0%, #fff8f5 100%);
+        }
+        
         .pattern-type {
             background: #ff6600;
             color: white;
@@ -544,7 +578,10 @@
         .pattern-preview pre {
             margin: 0;
             padding: 16px;
-            overflow-x: auto;
+            overflow-x: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            white-space: pre-wrap;
             font-size: 13px;
             line-height: 1.6;
             background: transparent !important;
@@ -611,6 +648,24 @@
         
         .expand-btn:hover {
             background: #ff6600;
+        }
+        
+        .metadata-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
+        
+        .metadata-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .pattern-tags {
@@ -1324,6 +1379,92 @@
             return languageMap[type] || 'plaintext';
         }
         
+        // Render warning banner
+        function renderWarningBanner(pattern) {
+            if (!pattern.has_warnings || !pattern.warning_flags) return '';
+            
+            try {
+                const warnings = JSON.parse(pattern.warning_flags);
+                if (!warnings || warnings.length === 0) return '';
+                
+                // Parse and categorize warnings
+                const securityWarnings = warnings.filter(w => w.includes('Security:'));
+                const structureWarnings = warnings.filter(w => w.includes('Structure:'));
+                const otherWarnings = warnings.filter(w => !w.includes('Security:') && !w.includes('Structure:'));
+                
+                // Use appropriate icon and title based on warning type
+                let icon = '⚠️';
+                let title = 'Warning';
+                if (securityWarnings.length > 0) {
+                    icon = '🔒';
+                    title = 'Security Warning';
+                }
+                
+                return `
+                    <div class="warning-banner">
+                        <span class="warning-icon">${icon}</span>
+                        <div class="warning-text">
+                            <div class="warning-title">${title}</div>
+                            ${warnings.map(w => w.replace(/^(Security|Structure):\s*/, '')).join(' • ')}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                // Fallback for unparseable warnings
+                return `
+                    <div class="warning-banner">
+                        <span class="warning-icon">⚠️</span>
+                        <div class="warning-text">
+                            <div class="warning-title">Warning</div>
+                            This pattern has been flagged with warnings. Review carefully before use.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Render metadata badges
+        function renderMetadataBadges(pattern) {
+            if (!pattern.metadata) return '';
+            
+            const badges = [];
+            
+            // Hook event type badge
+            if (pattern.type === 'hook' && pattern.metadata.eventType) {
+                const eventColors = {
+                    'PreToolUse': '#3498db',
+                    'PostToolUse': '#9b59b6',
+                    'UserPromptSubmit': '#2ecc71',
+                    'SessionStart': '#f39c12',
+                    'Stop': '#e74c3c',
+                    'SubagentStop': '#95a5a6',
+                    'PreCompact': '#34495e',
+                    'Notification': '#16a085'
+                };
+                const color = eventColors[pattern.metadata.eventType] || '#666';
+                badges.push(`<span class="metadata-badge" style="background: ${color};">📎 ${pattern.metadata.eventType}</span>`);
+            }
+            
+            // Command arguments support
+            if (pattern.type === 'command' && pattern.metadata.commandTrigger) {
+                if (pattern.metadata.commandTrigger === 'arguments') {
+                    badges.push(`<span class="metadata-badge" style="background: #27ae60;">⚡ Supports arguments</span>`);
+                }
+            }
+            
+            // Agent tools requirement
+            if (pattern.type === 'agent' && pattern.metadata.toolsRequired) {
+                const tools = pattern.metadata.toolsRequired;
+                if (tools.length === 1 && tools[0] === '*') {
+                    badges.push(`<span class="metadata-badge" style="background: #8e44ad;">🔧 All tools</span>`);
+                } else if (tools.length > 0) {
+                    badges.push(`<span class="metadata-badge" style="background: #8e44ad;">🔧 ${tools.slice(0, 3).join(', ')}${tools.length > 3 ? '...' : ''}</span>`);
+                }
+            }
+            
+            return badges.length > 0 ? `<div class="metadata-badges">${badges.join('')}</div>` : '';
+        }
+        
         // Render code preview with syntax highlighting
         function renderCodePreview(content, type, id) {
             if (!content) return '';
@@ -1462,7 +1603,7 @@
             }
             
             container.innerHTML = patterns.map(pattern => `
-                <div class="pattern-card" data-id="${pattern.id}">
+                <div class="pattern-card${pattern.has_warnings ? ' has-warnings' : ''}" data-id="${pattern.id}">
                     <div class="pattern-header">
                         <a href="/pattern/${pattern.id}" class="pattern-title">
                             ${DOMPurify.sanitize(pattern.title)}${pattern.has_warnings ? '<span class="warning-badge" title="This pattern has validation warnings">⚠</span>' : ''}
@@ -1471,6 +1612,10 @@
                     </div>
                     
                     <p class="pattern-description">${DOMPurify.sanitize(pattern.description)}</p>
+                    
+                    ${renderWarningBanner(pattern)}
+                    
+                    ${renderMetadataBadges(pattern)}
                     
                     ${renderCodePreview(pattern.content, pattern.type, pattern.id)}
                     

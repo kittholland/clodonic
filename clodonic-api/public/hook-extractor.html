@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hook Extractor - Clodonic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #ff6600;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+        
+        .step h3 {
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 200px;
+        }
+        
+        button {
+            background: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #e55500;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .hook-list {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .hook-list.active {
+            display: block;
+        }
+        
+        .hook-item {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .hook-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .hook-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #3498db;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .hook-preview {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 100px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .select-btn {
+            background: #4caf50;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .output-section {
+            display: none;
+        }
+        
+        .output-section.active {
+            display: block;
+        }
+        
+        .back-link {
+            color: #ff6600;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/submit.html" class="back-link">← Back to Submit Pattern</a>
+        
+        <h1>🪝 Hook Extractor</h1>
+        <p class="subtitle">Extract individual hooks from your Claude Code settings.json file</p>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <h3>Paste your settings.json</h3>
+            <p style="margin-left: 40px; margin-bottom: 10px; color: #666;">
+                Copy the contents of <code>~/.claude/settings.json</code> and paste below
+            </p>
+            <textarea id="settings-input" placeholder='Paste your entire settings.json file here...
+
+Example:
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [...]
+      }
+    ]
+  }
+}'></textarea>
+            <button onclick="parseSettings()">Extract Hooks</button>
+            <div id="parse-error"></div>
+        </div>
+        
+        <div class="hook-list" id="hook-list">
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Select a hook to share</h3>
+                <div id="hooks-container"></div>
+            </div>
+        </div>
+        
+        <div class="output-section" id="output-section">
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Ready to submit!</h3>
+                <p style="margin-left: 40px; margin-bottom: 10px; color: #666;">
+                    This hook configuration is ready to submit to Clodonic:
+                </p>
+                <textarea id="hook-output" readonly></textarea>
+                <button onclick="copyToClipboard()">Copy to Clipboard</button>
+                <button onclick="submitToClodonic()">Submit to Clodonic →</button>
+                <div id="copy-status"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedHook = null;
+        
+        function parseSettings() {
+            const input = document.getElementById('settings-input').value.trim();
+            const errorDiv = document.getElementById('parse-error');
+            const hookList = document.getElementById('hook-list');
+            const hooksContainer = document.getElementById('hooks-container');
+            
+            errorDiv.innerHTML = '';
+            hooksContainer.innerHTML = '';
+            hookList.classList.remove('active');
+            document.getElementById('output-section').classList.remove('active');
+            
+            if (!input) {
+                errorDiv.innerHTML = '<div class="error">Please paste your settings.json content</div>';
+                return;
+            }
+            
+            try {
+                const settings = JSON.parse(input);
+                const hooks = [];
+                
+                // Extract hooks from different event types
+                if (settings.hooks) {
+                    ['PreToolUse', 'PostToolUse', 'UserPromptSubmit'].forEach(eventType => {
+                        if (settings.hooks[eventType]) {
+                            settings.hooks[eventType].forEach(hook => {
+                                hooks.push({
+                                    type: eventType,
+                                    config: hook
+                                });
+                            });
+                        }
+                    });
+                }
+                
+                if (hooks.length === 0) {
+                    errorDiv.innerHTML = '<div class="error">No hooks found in settings.json</div>';
+                    return;
+                }
+                
+                // Display hooks
+                hooks.forEach((hook, index) => {
+                    const hookDiv = document.createElement('div');
+                    hookDiv.className = 'hook-item';
+                    
+                    const matcher = hook.config.matcher || 'All';
+                    const description = extractDescription(hook.config);
+                    
+                    hookDiv.innerHTML = `
+                        <div class="hook-header">
+                            <div>
+                                <span class="hook-type">${hook.type}</span>
+                                <strong style="margin-left: 10px;">Matcher: ${matcher}</strong>
+                            </div>
+                            <button class="select-btn" onclick="selectHook(${index})">Select This Hook</button>
+                        </div>
+                        <div style="color: #666; font-size: 14px; margin: 5px 0;">${description}</div>
+                        <div class="hook-preview">${JSON.stringify(hook.config, null, 2)}</div>
+                    `;
+                    
+                    hooksContainer.appendChild(hookDiv);
+                });
+                
+                // Store hooks for selection
+                window.extractedHooks = hooks;
+                hookList.classList.add('active');
+                
+            } catch (e) {
+                errorDiv.innerHTML = `<div class="error">Invalid JSON: ${e.message}</div>`;
+            }
+        }
+        
+        function extractDescription(hookConfig) {
+            if (hookConfig.hooks && hookConfig.hooks.length > 0) {
+                const hook = hookConfig.hooks[0];
+                if (hook.command) {
+                    // Try to extract a comment from the command
+                    const lines = hook.command.split('\\n');
+                    for (let line of lines) {
+                        if (line.startsWith('#') && !line.startsWith('#!')) {
+                            return line.substring(1).trim();
+                        }
+                    }
+                }
+            }
+            return 'Custom hook configuration';
+        }
+        
+        function selectHook(index) {
+            const hook = window.extractedHooks[index];
+            selectedHook = hook.config;
+            
+            // Format the hook for submission
+            const formatted = JSON.stringify(hook.config, null, 2);
+            
+            document.getElementById('hook-output').value = formatted;
+            document.getElementById('output-section').classList.add('active');
+            
+            // Scroll to output
+            document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyToClipboard() {
+            const output = document.getElementById('hook-output');
+            output.select();
+            document.execCommand('copy');
+            
+            const status = document.getElementById('copy-status');
+            status.innerHTML = '<div class="success">Copied to clipboard!</div>';
+            setTimeout(() => status.innerHTML = '', 3000);
+        }
+        
+        function submitToClodonic() {
+            const hookContent = document.getElementById('hook-output').value;
+            
+            // Store in sessionStorage and redirect to submit page
+            sessionStorage.setItem('hookContent', hookContent);
+            sessionStorage.setItem('patternType', 'hook');
+            
+            window.location.href = '/submit.html';
+        }
+    </script>
+</body>
+</html>
