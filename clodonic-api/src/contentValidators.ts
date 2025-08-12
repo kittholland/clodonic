@@ -11,11 +11,18 @@ export interface ValidationResult {
  */
 export function validateAgent(content: string): ValidationResult {
   try {
-    // Extract YAML frontmatter (everything before first ---)
+    // Check if content has YAML frontmatter (markdown format) or is plain YAML
+    const hasYamlFrontmatter = content.includes('\n---\n');
     let yamlContent = content;
-    const yamlEnd = content.indexOf('\n---');
-    if (yamlEnd !== -1) {
-      yamlContent = content.slice(0, yamlEnd);
+    let systemPrompt = '';
+    
+    if (hasYamlFrontmatter) {
+      // Extract YAML frontmatter (everything before ---) 
+      const yamlEnd = content.indexOf('\n---');
+      if (yamlEnd !== -1) {
+        yamlContent = content.slice(0, yamlEnd);
+        systemPrompt = content.slice(content.indexOf('\n---\n') + 5).trim();
+      }
     }
     
     // Parse YAML
@@ -45,18 +52,23 @@ export function validateAgent(content: string): ValidationResult {
     // Tool validation (if specified)
     if (agent.tools) {
       if (typeof agent.tools === 'string') {
-        // Simple string format like "Read, Edit, Bash"
-        const tools = agent.tools.split(',').map((t: string) => t.trim());
-        const validTools = ['Read', 'Edit', 'Write', 'Bash', 'Grep', 'Glob', 'Task'];
-        const invalidTools = tools.filter((t: string) => !validTools.includes(t));
-        
-        if (invalidTools.length > 0) {
-          warnings.push(`Unknown tools: ${invalidTools.join(', ')}`);
+        // Check for wildcard first
+        if (agent.tools === '*') {
+          // Valid - all tools allowed
+        } else {
+          // Simple string format like "Read, Edit, Bash"
+          const tools = agent.tools.split(',').map((t: string) => t.trim());
+          const validTools = ['Read', 'Edit', 'Write', 'Bash', 'Grep', 'Glob', 'Task', 'MultiEdit', 'TodoWrite', 'WebFetch', 'WebSearch'];
+          const invalidTools = tools.filter((t: string) => t !== '*' && !validTools.includes(t));
+          
+          if (invalidTools.length > 0) {
+            warnings.push(`Unknown tools: ${invalidTools.join(', ')}`);
+          }
         }
       } else if (Array.isArray(agent.tools)) {
         // Array format
-        const validTools = ['Read', 'Edit', 'Write', 'Bash', 'Grep', 'Glob', 'Task'];
-        const invalidTools = agent.tools.filter((t: any) => typeof t === 'string' && !validTools.includes(t));
+        const validTools = ['Read', 'Edit', 'Write', 'Bash', 'Grep', 'Glob', 'Task', 'MultiEdit', 'TodoWrite', 'WebFetch', 'WebSearch'];
+        const invalidTools = agent.tools.filter((t: any) => typeof t === 'string' && t !== '*' && !validTools.includes(t));
         
         if (invalidTools.length > 0) {
           warnings.push(`Unknown tools: ${invalidTools.join(', ')}`);
@@ -64,16 +76,22 @@ export function validateAgent(content: string): ValidationResult {
       }
     }
     
-    // System prompt validation (everything after YAML frontmatter)
-    const systemPromptStart = content.indexOf('\n---\n');
-    if (systemPromptStart === -1) {
-      warnings.push('No system prompt found after YAML frontmatter');
-    } else {
-      const systemPrompt = content.slice(systemPromptStart + 5).trim();
+    // System prompt or instructions validation
+    if (hasYamlFrontmatter) {
+      // Markdown format - check system prompt
       if (!systemPrompt) {
         warnings.push('System prompt appears to be empty');
       } else if (systemPrompt.length < 10) {
         warnings.push('System prompt is very short');
+      }
+    } else {
+      // Plain YAML format - check for instructions field
+      if (!agent.instructions) {
+        warnings.push('No instructions field found in agent YAML');
+      } else if (typeof agent.instructions !== 'string') {
+        warnings.push('Instructions field should be a string');
+      } else if (agent.instructions.length < 10) {
+        warnings.push('Instructions are very short');
       }
     }
     

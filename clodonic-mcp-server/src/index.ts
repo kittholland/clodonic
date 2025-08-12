@@ -327,12 +327,48 @@ export class ClodonicMCP extends McpAgent {
 				break;
 
 			case "agent":
-				preview += `📁 Would create: .claude/agents/clodonic-${slug}.yaml\n`;
-				preview += `📝 Would update: .claude/claude.json\n`;
+				preview += `📁 Would create: .claude/agents/clodonic-${slug}.md\n`;
+				preview += `📝 Would update: .claude/clodonic-manifest.json\n`;
 				preview += `⚠️ Restart required after installation\n`;
 				preview += `\n**Agent configuration:**\n\`\`\`yaml\n`;
 				preview += `# Clodonic Pattern: ${pattern.id}\n# ${pattern.title}\n`;
-				preview += pattern.content;
+				// Show parsed format
+				if (!pattern.content.includes('\n---\n')) {
+					// Parse and show what will be created
+					let parsedName = `clodonic-${slug}`;
+					let parsedDesc = pattern.description;
+					let parsedInstructions = '';
+					
+					const lines = pattern.content.split('\n');
+					let inInstructions = false;
+					let instructions: string[] = [];
+					
+					for (const line of lines) {
+						if (line.startsWith('name:')) {
+							parsedName = line.substring(5).trim();
+						} else if (line.startsWith('description:')) {
+							parsedDesc = line.substring(12).trim();
+						} else if (line.startsWith('instructions:')) {
+							inInstructions = true;
+							const afterColon = line.substring(13).trim();
+							if (afterColon && afterColon !== '|') {
+								instructions.push(afterColon);
+							}
+						} else if (inInstructions) {
+							instructions.push(line.replace(/^  /, ''));
+						}
+					}
+					
+					if (instructions.length > 0) {
+						parsedInstructions = instructions.join('\n').trim();
+					}
+					
+					preview += `name: ${parsedName}\n`;
+					preview += `description: ${parsedDesc}\n`;
+					preview += `instructions: |\n  ${parsedInstructions.split('\n').join('\n  ')}`;
+				} else {
+					preview += pattern.content;
+				}
 				preview += `\n\`\`\``;
 				break;
 
@@ -423,10 +459,65 @@ Updating CLAUDE.md now...`;
 		const agentFile = `.claude/agents/clodonic-${slug}.md`;
 		const manifestEntry = this.generateManifestEntry(pattern, slug, date, [agentFile]);
 
-		const agentContent = `---
-name: clodonic-${slug}
-description: ${pattern.description}
-tools: "*"
+		// Parse agent content to extract name, description, and instructions
+		let agentName = `clodonic-${slug}`;
+		let agentDescription = pattern.description;
+		let agentInstructions = pattern.content;
+		let agentTools = "*";
+		
+		// Check if content is YAML format (our current format) or markdown with frontmatter
+		if (pattern.content.includes('\n---\n')) {
+			// Already in markdown format with frontmatter - use as is
+			agentInstructions = pattern.content;
+		} else {
+			// Try to parse YAML format and extract fields
+			try {
+				// Simple YAML parsing for our agent format
+				const lines = pattern.content.split('\n');
+				let inInstructions = false;
+				let instructions: string[] = [];
+				
+				for (const line of lines) {
+					if (line.startsWith('name:')) {
+						agentName = line.substring(5).trim();
+					} else if (line.startsWith('description:')) {
+						agentDescription = line.substring(12).trim();
+					} else if (line.startsWith('tools:')) {
+						agentTools = line.substring(6).trim() || "*";
+					} else if (line.startsWith('instructions:')) {
+						inInstructions = true;
+						// Check if it's a single line or multiline
+						const afterColon = line.substring(13).trim();
+						if (afterColon && afterColon !== '|') {
+							instructions.push(afterColon);
+						}
+					} else if (inInstructions) {
+						// Collect instruction lines (remove leading spaces from YAML indent)
+						instructions.push(line.replace(/^  /, ''));
+					}
+				}
+				
+				if (instructions.length > 0) {
+					agentInstructions = instructions.join('\n').trim();
+				}
+			} catch (e) {
+				// If parsing fails, use raw content as instructions
+				agentInstructions = pattern.content;
+			}
+			
+		}
+		
+		// Build final agent content
+		let agentContent: string;
+		if (pattern.content.includes('\n---\n')) {
+			// Already properly formatted - use as is
+			agentContent = pattern.content;
+		} else {
+			// Build proper markdown + frontmatter format from YAML
+			agentContent = `---
+name: ${agentName}
+description: ${agentDescription}
+tools: ${agentTools}
 ---
 
 <!-- Clodonic Pattern: ${pattern.id} -->
@@ -434,7 +525,8 @@ tools: "*"
 <!-- Installed: ${date} -->
 <!-- Source: https://clodonic.ai/patterns/${pattern.id} -->
 
-${pattern.content}`;
+${agentInstructions}`;
+		}
 
 		return `${icon} **Installing "${pattern.title}" agent**
 
