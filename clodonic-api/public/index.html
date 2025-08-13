@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clodonic - Claude Code Patterns</title>
-    <!-- Test auto-deployment -->
     <!-- Prism.js for syntax highlighting -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
@@ -142,11 +141,10 @@
             opacity: 1;
         }
         
-        /* Header */
+        /* Redesigned Header */
         header {
             background: white;
             border-bottom: 2px solid #ff6600;
-            padding: 16px 0;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -156,15 +154,22 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+        }
+        
+        /* Two-tier header design */
+        .header-top {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
             gap: 20px;
         }
         
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
+            flex-shrink: 0;
         }
         
         .logo {
@@ -187,51 +192,104 @@
             font-size: 12px;
             color: #666;
             font-weight: normal;
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .tagline {
+                display: block;
+            }
         }
         
         .header-search {
             flex: 1;
-            max-width: 300px;
-            min-width: 200px;
+            max-width: 400px;
         }
         
         .header-search input {
             width: 100%;
-            padding: 12px 20px;
+            padding: 10px 20px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 15px;
-            background: white;
+            border-radius: 24px;
+            font-size: 14px;
+            background: #f8f8f8;
             transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
         
         .header-search input:focus {
             outline: none;
             border-color: #ff6600;
             background: white;
-            box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
         }
         
         .header-search input::placeholder {
             color: #999;
-            font-weight: 400;
         }
         
-        /* Pattern Type Pills */
-        .type-nav {
+        /* Filter tabs as bottom section */
+        .header-filters {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 4px;
+            padding: 0 0 12px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
         
-        /* Auth Section */
-        .auth-section {
+        .header-filters::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .filter-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            position: relative;
         }
         
+        .filter-btn:hover {
+            color: #ff6600;
+        }
+        
+        .filter-btn.active {
+            color: #ff6600;
+            font-weight: 600;
+        }
+        
+        .filter-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ff6600;
+        }
+        
+        .filter-count {
+            font-size: 12px;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .filter-btn.active .filter-count {
+            background: #ff6600;
+            color: white;
+        }
+        
+        /* Auth button */
         .auth-btn {
             padding: 8px 16px;
             background: #1a1a1a;
@@ -246,885 +304,316 @@
             gap: 6px;
             border: none;
             cursor: pointer;
+            flex-shrink: 0;
         }
         
         .auth-btn:hover {
             background: #333;
         }
         
-        .auth-btn.github {
-            background: #24292e;
+        .auth-btn img {
+            width: 18px;
+            height: 18px;
         }
         
-        .auth-btn.github:hover {
-            background: #3a3f44;
-        }
-        
-        .user-menu {
-            position: relative;
-        }
-        
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: border-color 0.2s;
-        }
-        
-        .user-avatar:hover {
-            border-color: #ff6600;
-        }
-        
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            min-width: 200px;
-            display: none;
-            z-index: 1000;
-        }
-        
-        .user-dropdown.active {
-            display: block;
-        }
-        
-        .user-info {
-            padding: 12px 16px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .user-email {
-            font-size: 12px;
-            color: #666;
-            margin-top: 2px;
-        }
-        
-        .dropdown-item {
-            padding: 10px 16px;
-            display: block;
-            color: #1a1a1a;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background 0.2s;
-            cursor: pointer;
-        }
-        
-        .dropdown-item:hover {
-            background: #f5f5f5;
-        }
-        
-        .dropdown-item.danger {
-            color: #d32f2f;
-        }
-        
-        .type-pill {
-            padding: 6px 14px;
-            background: #f0f0f0;
-            border-radius: 20px;
-            text-decoration: none;
-            color: #1a1a1a;
-            font-size: 13px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-        
-        .type-pill:hover {
-            background: #ff6600;
-            color: white;
-        }
-        
-        .type-pill.active {
-            background: #ff6600;
-            color: white;
-        }
-        
-        .type-pill .count {
-            opacity: 0.7;
-            margin-left: 4px;
-        }
-        
-        /* Main Layout */
+        /* Main Content */
         .main-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 30px;
-        }
-        
-        .stats-bar {
+            padding: 24px 20px;
             display: flex;
             gap: 24px;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            grid-column: span 2;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
-        
-        .stat {
-            text-align: center;
-            flex: 1;
-            min-width: 80px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #ff6600;
-            line-height: 1;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
         }
         
         /* Sidebar */
         .sidebar {
-            position: sticky;
-            top: 100px;
-            height: fit-content;
+            width: 240px;
+            flex-shrink: 0;
         }
         
-        .sidebar h3 {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #999;
-            margin-bottom: 12px;
-            font-weight: 600;
+        .sidebar-section {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
-        .filter-group {
-            margin-bottom: 24px;
-        }
-        
-        .filter-option {
-            display: block;
-            padding: 6px 0;
-            color: #666;
-            text-decoration: none;
+        .sidebar-section h3 {
             font-size: 14px;
-            transition: color 0.2s;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+        }
+        
+        .sort-option {
+            display: block;
+            padding: 8px 12px;
+            margin: 0 -12px;
             cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            text-align: left;
+            width: calc(100% + 24px);
+            font-size: 14px;
+            color: #333;
         }
         
-        .filter-option:hover {
-            color: #ff6600;
+        .sort-option:hover {
+            background: #f8f8f8;
         }
         
-        .filter-option.active {
+        .sort-option.active {
+            background: #fff5f0;
             color: #ff6600;
             font-weight: 600;
         }
         
-        .filter-option .badge {
-            float: right;
-            background: #f0f0f0;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
+        /* Patterns Grid */
+        .patterns-container {
+            flex: 1;
+            min-width: 0;
         }
         
-        /* Pattern Cards */
         .patterns-grid {
             display: grid;
-            gap: 20px;
+            gap: 16px;
         }
         
         .pattern-card {
             background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: all 0.2s;
-            overflow: hidden;
-            max-width: 100%;
+            cursor: pointer;
         }
         
         .pattern-card:hover {
-            border-color: #ff6600;
-            box-shadow: 0 8px 24px rgba(255, 102, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transform: translateY(-2px);
         }
         
         .pattern-header {
             display: flex;
             justify-content: space-between;
-            align-items: start;
-            margin-bottom: 16px;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
         
         .pattern-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a1a1a;
-            text-decoration: none;
-            line-height: 1.3;
-            cursor: pointer;
-        }
-        
-        .pattern-title:hover {
-            color: #ff6600;
-        }
-        
-        .warning-badge {
-            background: #ff9800;
-            color: white;
-            font-size: 11px;
-            padding: 2px 5px;
-            border-radius: 3px;
-            margin-left: 8px;
-            font-weight: normal;
-            cursor: help;
-        }
-        
-        .warning-banner {
-            background: linear-gradient(135deg, #fff5f0 0%, #ffebe0 100%);
-            border: 1px solid #ff9800;
-            border-radius: 6px;
-            padding: 10px 14px;
-            margin: 12px 0;
-            display: flex;
-            align-items: start;
-            gap: 10px;
-            font-size: 13px;
-            color: #e65100;
-        }
-        
-        .warning-banner .warning-icon {
             font-size: 18px;
-            flex-shrink: 0;
-        }
-        
-        .warning-banner .warning-text {
-            flex: 1;
-            line-height: 1.4;
-        }
-        
-        .warning-banner .warning-title {
             font-weight: 600;
-            margin-bottom: 4px;
-            color: #d84315;
-        }
-        
-        .pattern-card.has-warnings {
-            border-color: #ff9800;
-            background: linear-gradient(135deg, #fffaf8 0%, #fff8f5 100%);
+            color: #1a1a1a;
+            margin: 0;
         }
         
         .pattern-type {
-            background: #ff6600;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            white-space: nowrap;
         }
         
-        .pattern-type.claude-md {
-            background: #2ecc71;
-        }
-        
-        .pattern-type.agent {
-            background: #9b59b6;
-        }
-        
-        .pattern-type.hook {
-            background: #3498db;
-        }
-        
-        .pattern-type.command {
-            background: #e74c3c;
-        }
+        .pattern-type.claude_md { background: #e3f2fd; color: #1976d2; }
+        .pattern-type.agent { background: #f3e5f5; color: #7b1fa2; }
+        .pattern-type.prompt { background: #e8f5e9; color: #388e3c; }
+        .pattern-type.hook { background: #fff3e0; color: #f57c00; }
+        .pattern-type.command { background: #fce4ec; color: #c2185b; }
         
         .pattern-description {
             color: #666;
-            font-size: 16px;
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-        
-        .pattern-preview {
-            position: relative;
-            background: #2d2d2d;
-            border-radius: 8px;
-            margin: 16px 0;
-            overflow: hidden;
-            border: 1px solid #444;
-        }
-        
-        .pattern-preview pre {
-            margin: 0;
-            padding: 16px;
-            padding-right: 30px; /* Add extra padding to account for scrollbar */
-            overflow-x: hidden;
-            overflow-y: auto;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            font-size: 13px;
-            line-height: 1.6;
-            background: transparent !important;
-            transition: max-height 0.3s ease;
-        }
-        
-        .pattern-preview.collapsed pre {
-            max-height: 200px;
-        }
-        
-        .pattern-preview.expanded pre {
-            max-height: none;
-        }
-        
-        .pattern-preview code {
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            background: transparent !important;
-        }
-        
-        .copy-btn {
-            position: absolute;
-            top: 12px;
-            right: 28px; /* Move left to avoid scrollbar */
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            opacity: 0;
-            z-index: 10;
-        }
-        
-        .pattern-card:hover .copy-btn {
-            opacity: 1;
-        }
-        
-        .copy-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .copy-btn.copied {
-            background: #4caf50;
-            border-color: #4caf50;
-        }
-        
-        .expand-btn {
-            position: absolute;
-            bottom: 12px;
-            right: 28px; /* Move left to avoid scrollbar */
-            padding: 6px 16px;
-            background: rgba(255, 102, 0, 0.9);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            z-index: 10;
-        }
-        
-        .expand-btn:hover {
-            background: #ff6600;
-        }
-        
-        .metadata-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 12px 0;
-        }
-        
-        .metadata-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: 600;
-            color: white;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 12px;
         }
         
         .pattern-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin: 16px 0;
+            margin-bottom: 12px;
         }
         
-        .pattern-tag {
+        .tag {
             background: #f0f0f0;
             color: #666;
-            padding: 4px 10px;
-            border-radius: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 12px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        
-        .pattern-tag:hover {
-            background: #ff6600;
-            color: white;
         }
         
         .pattern-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
-            padding-top: 16px;
+            padding-top: 12px;
             border-top: 1px solid #f0f0f0;
         }
         
-        .pattern-stats {
+        .vote-buttons {
             display: flex;
+            gap: 8px;
             align-items: center;
-            gap: 16px;
-            font-size: 13px;
-            color: #666;
         }
         
-        .pattern-stats span {
+        .vote-btn {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 4px;
         }
         
-        .vote-btn {
-            background: #f0f0f0;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
         .vote-btn:hover {
-            background: #ff6600;
-            color: white;
+            background: #fff;
+            border-color: #ff6600;
         }
         
         .vote-btn.voted {
             background: #ff6600;
             color: white;
+            border-color: #ff6600;
         }
         
-        .submit-float {
+        /* Submit Button */
+        .submit-btn {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 24px;
+            right: 24px;
             background: #ff6600;
             color: white;
-            padding: 16px 24px;
-            border-radius: 50px;
+            padding: 12px 24px;
+            border-radius: 24px;
             text-decoration: none;
             font-weight: 600;
-            box-shadow: 0 4px 20px rgba(255, 102, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
             transition: all 0.2s;
-            z-index: 1000;
+            z-index: 50;
         }
         
-        .submit-float:hover {
-            background: #e55a00;
+        .submit-btn:hover {
+            background: #e55500;
             transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(255, 102, 0, 0.4);
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 16px;
+            box-shadow: 0 6px 20px rgba(255, 102, 0, 0.4);
         }
         
         /* Footer */
         footer {
             background: white;
-            border-top: 1px solid #e0e0e0;
-            padding: 40px 0;
-            margin-top: 60px;
-            color: #666;
+            border-top: 1px solid #e1e1e1;
+            padding: 32px 0;
+            margin-top: 48px;
         }
         
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            text-align: center;
         }
         
         .disclaimer {
-            background: #fff5f0;
-            border: 1px solid #ffd4b3;
+            background: #fff8f5;
+            border: 1px solid #ffe0cc;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .disclaimer h4 {
-            color: #d32f2f;
+            color: #ff6600;
             margin-bottom: 8px;
+            font-size: 14px;
         }
         
         .disclaimer p {
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #666;
         }
         
-        .footer-links {
-            text-align: center;
-            font-size: 14px;
-        }
-        
-        .footer-links a {
-            color: #ff6600;
-            text-decoration: none;
-        }
-        
-        .footer-links a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Mobile */
-        /* Tablet styles */
-        @media (max-width: 1024px) {
-            .container {
-                padding: 0 20px;
-            }
-            
-            .main-content {
-                gap: 30px;
-            }
-        }
-        
-        /* Mobile styles */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            body {
-                font-size: 14px;
-                width: 100%;
-                max-width: 100vw;
-            }
-            
-            header {
-                padding: 12px 0;
-                max-width: 100vw;
-                overflow-x: hidden;
-            }
-            
-            .header-content {
-                flex-direction: column;
+            .header-top {
+                flex-wrap: wrap;
                 gap: 12px;
-                align-items: stretch;
-                padding: 0 15px;
-                max-width: 100%;
-            }
-            
-            .logo-section {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-            }
-            
-            .logo {
-                font-size: 20px;
-            }
-            
-            .tagline {
-                display: none;
             }
             
             .header-search {
-                width: 100%;
+                order: 3;
+                flex-basis: 100%;
                 max-width: none;
-                font-size: 14px;
-                padding: 10px 12px;
-            }
-            
-            .type-nav {
-                display: flex;
-                overflow-x: auto;
-                gap: 8px;
-                padding-bottom: 5px;
-                width: 100%;
-                justify-content: flex-start;
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .type-nav::-webkit-scrollbar {
-                height: 3px;
-            }
-            
-            .type-pill {
-                white-space: nowrap;
-                flex-shrink: 0;
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-            
-            .auth-section .btn {
-                padding: 8px 12px;
-                font-size: 13px;
-            }
-            
-            .auth-section img {
-                display: none;
-            }
-            
-            .container {
-                padding: 0 15px;
             }
             
             .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 20px 0;
-            }
-            
-            .stats-bar {
-                grid-column: span 1;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-                padding: 12px;
-            }
-            
-            .stat {
-                padding: 8px;
-                min-width: auto;
-            }
-            
-            .stat-value {
-                font-size: 18px;
-            }
-            
-            .stat-label {
-                font-size: 11px;
+                flex-direction: column;
             }
             
             .sidebar {
-                display: none; /* Hide sidebar on mobile */
-            }
-            
-            .patterns-container {
-                padding: 0;
-            }
-            
-            .pattern-card {
-                margin-bottom: 15px;
-                padding: 15px;
-            }
-            
-            .pattern-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            
-            .pattern-title {
-                font-size: 16px;
-                line-height: 1.3;
-            }
-            
-            .pattern-type {
-                font-size: 10px;
-                padding: 3px 8px;
-            }
-            
-            .pattern-description {
-                font-size: 13px;
-                margin-bottom: 12px;
-            }
-            
-            .code-preview {
-                margin: 12px 0;
-                max-height: 200px;
-            }
-            
-            .code-preview pre {
-                padding: 10px;
-                font-size: 11px;
-            }
-            
-            .code-actions {
-                position: static;
-                display: flex;
-                gap: 8px;
-                margin-top: 8px;
-                background: var(--code-bg);
-                padding: 8px;
-                border-radius: 0 0 8px 8px;
-            }
-            
-            .code-actions button {
-                flex: 1;
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-            
-            .pattern-tags {
-                gap: 6px;
-                margin: 10px 0;
-                flex-wrap: wrap;
-            }
-            
-            .pattern-tag {
-                font-size: 11px;
-                padding: 3px 8px;
-            }
-            
-            .pattern-footer {
-                flex-direction: column;
-                gap: 10px;
-                align-items: stretch;
-            }
-            
-            .pattern-stats {
-                justify-content: space-between;
-                font-size: 12px;
-            }
-            
-            .vote-btn {
                 width: 100%;
-                justify-content: center;
-                padding: 10px;
             }
             
-            .submit-float {
-                bottom: 20px;
-                right: 20px;
-                padding: 12px 16px;
-                font-size: 14px;
-            }
-            
-            /* MCP Hero on mobile */
-            .mcp-hero {
-                margin: 10px;
-                padding: 15px;
-            }
-            
-            .mcp-hero h1 {
-                font-size: 20px;
-            }
-            
-            .mcp-hero p {
-                font-size: 13px;
-            }
-            
-            .mcp-install h3 {
-                font-size: 14px;
-            }
-            
-            .mcp-code-block {
-                padding: 10px;
-                font-size: 12px;
-            }
-            
-            .mcp-steps, .usage-steps {
-                flex-direction: column;
-                gap: 8px;
-                grid-template-columns: 1fr;
-            }
-            
-            .mcp-step {
-                padding: 8px;
-            }
-            
-            .mcp-dismiss {
-                padding: 8px 16px;
-                font-size: 13px;
-            }
-            
-            .install-command {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-            
-            /* Footer on mobile */
-            footer {
-                padding: 20px 15px;
-                font-size: 11px;
-            }
-            
-            .footer-disclaimer h4 {
-                font-size: 13px;
-            }
-            
-            /* User dropdown on mobile */
-            .user-menu {
-                position: relative;
-            }
-            
-            .user-dropdown {
-                right: 0;
-                left: auto;
-                min-width: 160px;
+            .submit-btn {
+                bottom: 16px;
+                right: 16px;
             }
         }
         
-        /* Small mobile styles */
-        @media (max-width: 480px) {
-            .stats-bar {
-                grid-template-columns: 1fr;
-            }
-            
-            .pattern-card {
-                padding: 12px;
-                border-radius: 8px;
-            }
-            
-            .code-preview.collapsed {
-                max-height: 120px;
-            }
-            
-            .pattern-stats span {
-                font-size: 11px;
-            }
-            
-            .type-nav {
-                gap: 6px;
-            }
-            
-            .type-pill {
-                padding: 5px 8px;
-                font-size: 11px;
-            }
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #999;
+        }
+        
+        .loading::after {
+            content: '.';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: #999;
+        }
+        
+        .empty-state h3 {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <!-- MCP Hero Section -->
     <div class="mcp-hero" id="mcp-hero">
+        <button class="dismiss-hero" onclick="dismissHero()">Dismiss</button>
         <div class="mcp-hero-content">
             <h1>🚀 Use patterns directly in Claude Code</h1>
             <p class="subtitle">The fastest way to discover and install community patterns</p>
@@ -1147,155 +636,120 @@
                     </div>
                     <div class="usage-step">
                         <strong>3. Use</strong>
-                        <span>Patterns auto-configure in your project!</span>
+                        <div>Patterns auto-configure in your project!</div>
                     </div>
                 </div>
             </div>
-            
-            <button class="dismiss-hero" onclick="dismissHero()">Dismiss</button>
         </div>
     </div>
     
+    <!-- Header -->
     <header>
         <div class="header-content">
-            <div class="logo-section">
-                <div class="logo">
-                    <a href="/">
-                        <span class="bracket">&lt;</span>clodonic<span class="bracket">/&gt;</span>
-                    </a>
+            <div class="header-top">
+                <div class="logo-section">
+                    <div class="logo">
+                        <a href="/">
+                            <span class="bracket">&lt;</span>clodonic<span class="bracket">/&gt;</span>
+                        </a>
+                    </div>
+                    <div class="tagline">Idiomatic patterns for Claude Code</div>
                 </div>
-                <div class="tagline">Idiomatic patterns for Claude Code</div>
+                
+                <div class="header-search">
+                    <input type="text" placeholder="Search patterns..." id="search-input">
+                </div>
+                
+                <a href="/api/auth/github" class="auth-btn">
+                    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub">
+                    Sign in
+                </a>
             </div>
             
-            <div class="header-search">
-                <input type="text" placeholder="🔍 Search patterns... (e.g. 'testing', 'git hooks', 'React')" id="search-input">
-            </div>
-            
-            <nav class="type-nav">
-                <a href="#" class="type-pill" data-type="">
-                    All <span class="count">0</span>
-                </a>
-                <a href="#" class="type-pill" data-type="claude_md">
-                    CLAUDE.md <span class="count">0</span>
-                </a>
-                <a href="#" class="type-pill" data-type="agent">
-                    Agents <span class="count">0</span>
-                </a>
-                <a href="#" class="type-pill" data-type="prompt">
-                    Prompts <span class="count">0</span>
-                </a>
-                <a href="#" class="type-pill" data-type="hook">
-                    Hooks <span class="count">0</span>
-                </a>
-                <a href="#" class="type-pill" data-type="command">
-                    Commands <span class="count">0</span>
-                </a>
+            <nav class="header-filters">
+                <button class="filter-btn active" data-type="all">
+                    All <span class="filter-count">30</span>
+                </button>
+                <button class="filter-btn" data-type="claude_md">
+                    CLAUDE.md <span class="filter-count">6</span>
+                </button>
+                <button class="filter-btn" data-type="agent">
+                    Agents <span class="filter-count">6</span>
+                </button>
+                <button class="filter-btn" data-type="prompt">
+                    Prompts <span class="filter-count">5</span>
+                </button>
+                <button class="filter-btn" data-type="hook">
+                    Hooks <span class="filter-count">6</span>
+                </button>
+                <button class="filter-btn" data-type="command">
+                    Commands <span class="filter-count">7</span>
+                </button>
             </nav>
-            
-            <div class="auth-section" id="auth-section">
-                <!-- Will be populated by JavaScript -->
-            </div>
         </div>
     </header>
     
+    <!-- Main Content -->
     <div class="main-content">
-        <div class="stats-bar">
-            <div class="stat">
-                <div class="stat-value" id="total-patterns">0</div>
-                <div class="stat-label">Patterns</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="total-tags">-</div>
-                <div class="stat-label">Tags</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="total-votes">-</div>
-                <div class="stat-label">Community Votes</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="pattern-types">5</div>
-                <div class="stat-label">Pattern Types</div>
-            </div>
-        </div>
-        
         <aside class="sidebar">
-            <div class="filter-group">
+            <div class="sidebar-section">
                 <h3>Sort By</h3>
-                <a class="filter-option active" data-sort="hot">
-                    Trending <span class="badge">🔥</span>
-                </a>
-                <a class="filter-option" data-sort="top">
+                <button class="sort-option active" data-sort="trending">
+                    Trending 🔥
+                </button>
+                <button class="sort-option" data-sort="votes">
                     Most Voted
-                </a>
-                <a class="filter-option" data-sort="new">
+                </button>
+                <button class="sort-option" data-sort="recent">
                     Recently Added
-                </a>
+                </button>
             </div>
             
-            <div class="filter-group" id="popular-tags">
+            <div class="sidebar-section">
                 <h3>Popular Tags</h3>
+                <div id="popular-tags" class="pattern-tags">
+                    <!-- Tags will be loaded here -->
+                </div>
             </div>
         </aside>
         
-        <div class="patterns-grid" id="patterns">
-            <div class="loading">Loading patterns...</div>
+        <div class="patterns-container">
+            <div id="patterns-grid" class="patterns-grid">
+                <div class="loading">Loading patterns</div>
+            </div>
         </div>
     </div>
     
-    <a href="/submit.html" class="submit-float">+ Submit Pattern</a>
+    <!-- Submit Button -->
+    <a href="/submit.html" class="submit-btn">+ Submit Pattern</a>
     
+    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="disclaimer">
                 <h4>⚠️ User Content Disclaimer</h4>
                 <p>All patterns, prompts, agents, hooks, and commands on this site are <strong>user-submitted content</strong>. While we filter obvious spam and malicious content, you should <strong>always review any pattern carefully</strong> before using it with Claude Code. Patterns can direct AI behavior in unexpected ways and may contain commands that could affect your system. Use at your own discretion.</p>
             </div>
-            <div class="footer-links">
-                <p>Clodonic © 2025 • Community-driven Claude Code patterns • <a href="https://github.com/kittholland/clodonic">Open Source</a></p>
-            </div>
+            
+            <p style="color: #666; font-size: 13px;">
+                Clodonic © 2025 • Community-driven Claude Code patterns • 
+                <a href="https://github.com/kittholland/clodonic" style="color: #ff6600;">Open Source</a>
+            </p>
         </div>
     </footer>
     
-    <!-- Prism.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    
-    <!-- DOMPurify for XSS protection -->
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
     
     <script>
-        // State
-        let currentSort = 'hot';
-        let currentType = null;
-        let currentTag = null;
-        let currentOffset = 0;
-        let isLoading = false;
-        let searchTimeout = null;
-        let allPatterns = []; // Cache for client-side filtering
-        let fullPatternDataset = []; // Full dataset for type counts
-        let currentUser = null;
+        // Core functionality will be added via JavaScript
         
-        // Get URL params
-        const params = new URLSearchParams(window.location.search);
-        currentType = params.get('type');
-        currentTag = params.get('tag');
-        currentSort = params.get('sort') || 'hot';
-        
-        // MCP Hero functions
-        function copyInstallCommand() {
-            const cmd = document.getElementById('install-cmd').textContent;
-            navigator.clipboard.writeText(cmd).then(() => {
-                const btn = document.querySelector('.copy-install');
-                const original = btn.textContent;
-                btn.textContent = 'Copied!';
-                btn.style.background = '#4caf50';
-                setTimeout(() => {
-                    btn.textContent = original;
-                    btn.style.background = '#ffd700';
-                }, 2000);
-            });
-        }
-        
+        // Dismiss hero section
         function dismissHero() {
             document.getElementById('mcp-hero').style.display = 'none';
             localStorage.setItem('mcp-hero-dismissed', 'true');
@@ -1306,562 +760,156 @@
             document.getElementById('mcp-hero').style.display = 'none';
         }
         
-        // Update active states
-        function updateActiveStates() {
-            // Type pills
-            document.querySelectorAll('.type-pill').forEach(pill => {
-                const pillType = pill.dataset.type;
-                pill.classList.toggle('active', pillType === currentType);
+        // Copy install command
+        function copyInstallCommand() {
+            const cmd = document.getElementById('install-cmd').textContent;
+            navigator.clipboard.writeText(cmd).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPatterns();
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterPatterns(e.target.value);
+                }, 300);
+            });
+            
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterByType(btn.dataset.type);
+                });
             });
             
             // Sort options
-            document.querySelectorAll('[data-sort]').forEach(option => {
-                option.classList.toggle('active', option.dataset.sort === currentSort);
+            document.querySelectorAll('.sort-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.sort-option').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    sortPatterns(btn.dataset.sort);
+                });
             });
         }
         
-        // Update URL without page reload
-        function updateUrl() {
-            const params = new URLSearchParams();
-            if (currentSort !== 'hot') params.set('sort', currentSort);
-            if (currentType) params.set('type', currentType);
-            if (currentTag) params.set('tag', currentTag);
-            
-            const newUrl = params.toString() ? `?${params.toString()}` : '/';
-            history.replaceState({}, '', newUrl);
-        }
-        
-        // Format time ago
-        function timeAgo(date) {
-            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-            const intervals = {
-                year: 31536000,
-                month: 2592000,
-                week: 604800,
-                day: 86400,
-                hour: 3600,
-                minute: 60
-            };
-            
-            for (const [name, value] of Object.entries(intervals)) {
-                const interval = Math.floor(seconds / value);
-                if (interval >= 1) {
-                    return interval === 1 ? `1 ${name} ago` : `${interval} ${name}s ago`;
-                }
-            }
-            return 'just now';
-        }
-        
-        // Format type display
-        function formatType(type) {
-            const typeMap = {
-                'claude_md': 'CLAUDE.md',
-                'agent': 'Agent',
-                'prompt': 'Prompt',
-                'hook': 'Hook',
-                'command': 'Command'
-            };
-            return typeMap[type] || type;
-        }
-        
-        // Get type class
-        function getTypeClass(type) {
-            return type.replace('_', '-');
-        }
-        
-        // Get language for syntax highlighting based on type
-        function getLanguageForType(type) {
-            const languageMap = {
-                'claude_md': 'markdown',
-                'agent': 'yaml',
-                'prompt': 'markdown',
-                'hook': 'bash',
-                'command': 'bash'
-            };
-            return languageMap[type] || 'plaintext';
-        }
-        
-        // Render warning banner
-        function renderWarningBanner(pattern) {
-            if (!pattern.has_warnings || !pattern.warning_flags) return '';
-            
-            try {
-                const warnings = JSON.parse(pattern.warning_flags);
-                if (!warnings || warnings.length === 0) return '';
-                
-                // Parse and categorize warnings
-                const securityWarnings = warnings.filter(w => w.includes('Security:'));
-                const structureWarnings = warnings.filter(w => w.includes('Structure:'));
-                const otherWarnings = warnings.filter(w => !w.includes('Security:') && !w.includes('Structure:'));
-                
-                // Use appropriate icon and title based on warning type
-                let icon = '⚠️';
-                let title = 'Warning';
-                if (securityWarnings.length > 0) {
-                    icon = '🔒';
-                    title = 'Security Warning';
-                }
-                
-                return `
-                    <div class="warning-banner">
-                        <span class="warning-icon">${icon}</span>
-                        <div class="warning-text">
-                            <div class="warning-title">${title}</div>
-                            ${warnings.map(w => w.replace(/^(Security|Structure):\s*/, '')).join(' • ')}
-                        </div>
-                    </div>
-                `;
-            } catch (e) {
-                // Fallback for unparseable warnings
-                return `
-                    <div class="warning-banner">
-                        <span class="warning-icon">⚠️</span>
-                        <div class="warning-text">
-                            <div class="warning-title">Warning</div>
-                            This pattern has been flagged with warnings. Review carefully before use.
-                        </div>
-                    </div>
-                `;
-            }
-        }
-        
-        // Render metadata badges
-        function renderMetadataBadges(pattern) {
-            if (!pattern.metadata) return '';
-            
-            const badges = [];
-            
-            // Hook event type badge
-            if (pattern.type === 'hook' && pattern.metadata.eventType) {
-                const eventColors = {
-                    'PreToolUse': '#3498db',
-                    'PostToolUse': '#9b59b6',
-                    'UserPromptSubmit': '#2ecc71',
-                    'SessionStart': '#f39c12',
-                    'Stop': '#e74c3c',
-                    'SubagentStop': '#95a5a6',
-                    'PreCompact': '#34495e',
-                    'Notification': '#16a085'
-                };
-                const color = eventColors[pattern.metadata.eventType] || '#666';
-                badges.push(`<span class="metadata-badge" style="background: ${color};">📎 ${pattern.metadata.eventType}</span>`);
-            }
-            
-            // Command arguments support
-            if (pattern.type === 'command' && pattern.metadata.commandTrigger) {
-                if (pattern.metadata.commandTrigger === 'arguments') {
-                    badges.push(`<span class="metadata-badge" style="background: #27ae60;">⚡ Supports arguments</span>`);
-                }
-            }
-            
-            // Agent tools requirement
-            if (pattern.type === 'agent' && pattern.metadata.toolsRequired) {
-                const tools = pattern.metadata.toolsRequired;
-                if (tools.length === 1 && tools[0] === '*') {
-                    badges.push(`<span class="metadata-badge" style="background: #8e44ad;">🔧 All tools</span>`);
-                } else if (tools.length > 0) {
-                    badges.push(`<span class="metadata-badge" style="background: #8e44ad;">🔧 ${tools.slice(0, 3).join(', ')}${tools.length > 3 ? '...' : ''}</span>`);
-                }
-            }
-            
-            return badges.length > 0 ? `<div class="metadata-badges">${badges.join('')}</div>` : '';
-        }
-        
-        // Render code preview with syntax highlighting
-        function renderCodePreview(content, type, id) {
-            if (!content) return '';
-            
-            const language = getLanguageForType(type);
-            const isLong = content.length > 400;
-            const preview = isLong ? content.substring(0, 400) : content;
-            
-            // Escape HTML for safe display
-            const escapedPreview = preview.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const escapedFull = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            
-            return `
-                <div class="pattern-preview ${isLong ? 'collapsed' : ''}" id="preview-${id}">
-                    <button class="copy-btn" data-content-id="${id}" onclick="copyCode(event)">
-                        Copy
-                    </button>
-                    ${isLong ? `<button class="expand-btn" onclick="toggleExpand(event, ${id})">Show more</button>` : ''}
-                    <pre><code class="language-${language}" data-preview="${btoa(unescape(encodeURIComponent(escapedPreview)))}" data-full="${btoa(unescape(encodeURIComponent(escapedFull)))}">${escapedPreview}${isLong ? '\n\n// ...' : ''}</code></pre>
-                </div>
-            `;
-        }
-        
-        // Toggle expand/collapse
-        function toggleExpand(event, id) {
-            event.stopPropagation();
-            event.preventDefault();
-            
-            const preview = document.getElementById(`preview-${id}`);
-            const btn = event.target;
-            const code = preview.querySelector('code');
-            
-            if (preview.classList.contains('collapsed')) {
-                // Expand
-                preview.classList.remove('collapsed');
-                preview.classList.add('expanded');
-                btn.textContent = 'Show less';
-                
-                // Show full content
-                const fullContent = atob(code.dataset.full);
-                code.innerHTML = decodeURIComponent(escape(fullContent));
-            } else {
-                // Collapse
-                preview.classList.remove('expanded');
-                preview.classList.add('collapsed');
-                btn.textContent = 'Show more';
-                
-                // Show preview content
-                const previewContent = atob(code.dataset.preview) + '\n\n// ...';
-                code.innerHTML = decodeURIComponent(escape(previewContent));
-            }
-            
-            // Re-highlight syntax
-            if (typeof Prism !== 'undefined') {
-                Prism.highlightElement(code);
-            }
-        }
-        
-        // Copy code to clipboard
-        function copyCode(event) {
-            event.stopPropagation();
-            event.preventDefault();
-            
-            const btn = event.target;
-            const patternCard = btn.closest('.pattern-card');
-            const patternId = patternCard.dataset.id;
-            const pattern = allPatterns.find(p => p.id == patternId);
-            
-            if (pattern && pattern.content) {
-                navigator.clipboard.writeText(pattern.content).then(() => {
-                    const originalText = btn.textContent;
-                    btn.textContent = 'Copied!';
-                    btn.classList.add('copied');
-                    setTimeout(() => {
-                        btn.textContent = originalText;
-                        btn.classList.remove('copied');
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
-            }
-        }
-        
-        // Load patterns
         async function loadPatterns() {
-            if (isLoading) return;
-            isLoading = true;
-            
             try {
-                const params = new URLSearchParams({
-                    sort: currentSort,
-                    limit: '30',
-                    offset: currentOffset.toString()
-                });
-                
-                if (currentType) params.set('type', currentType);
-                if (currentTag) params.set('tag', currentTag);
-                
-                const response = await fetch(`/api/items?${params}`);
-                const data = await response.json();
-                
-                if (currentOffset === 0) {
-                    allPatterns = data.items || [];
-                    // Store full dataset when loading all patterns (no type filter)
-                    if (!currentType && !currentTag) {
-                        fullPatternDataset = [...allPatterns];
-                    }
-                    renderPatterns(allPatterns);
-                } else {
-                    allPatterns = [...allPatterns, ...(data.items || [])];
-                    renderPatterns(allPatterns);
-                }
-                
-                updateStats(data.total);
-                
+                const response = await fetch('/api/patterns');
+                const patterns = await response.json();
+                displayPatterns(patterns);
+                updateCounts(patterns);
             } catch (error) {
-                console.error('Failed to load patterns:', error);
-                document.getElementById('patterns').innerHTML = 
-                    '<div class="loading">Failed to load patterns. Please try again.</div>';
-            } finally {
-                isLoading = false;
+                console.error('Error loading patterns:', error);
+                document.getElementById('patterns-grid').innerHTML = 
+                    '<div class="empty-state"><h3>Unable to load patterns</h3><p>Please try refreshing the page.</p></div>';
             }
         }
         
-        // Render patterns
-        function renderPatterns(patterns) {
-            const container = document.getElementById('patterns');
+        function displayPatterns(patterns) {
+            const grid = document.getElementById('patterns-grid');
             
             if (patterns.length === 0) {
-                container.innerHTML = `
-                    <div class="loading">
-                        No patterns found. <a href="/submit.html">Submit the first one!</a>
-                    </div>
-                `;
+                grid.innerHTML = '<div class="empty-state"><h3>No patterns yet</h3><p>Be the first to submit a pattern!</p></div>';
                 return;
             }
             
-            container.innerHTML = patterns.map(pattern => `
-                <div class="pattern-card${pattern.has_warnings ? ' has-warnings' : ''}" data-id="${pattern.id}">
+            grid.innerHTML = patterns.map(pattern => `
+                <div class="pattern-card" onclick="viewPattern(${pattern.id})">
                     <div class="pattern-header">
-                        <a href="/pattern/${pattern.id}" class="pattern-title">
-                            ${DOMPurify.sanitize(pattern.title)}${pattern.has_warnings ? '<span class="warning-badge" title="This pattern has validation warnings">⚠</span>' : ''}
-                        </a>
-                        <span class="pattern-type ${getTypeClass(pattern.type)}">${formatType(pattern.type)}</span>
+                        <h3 class="pattern-title">${escapeHtml(pattern.title)}</h3>
+                        <span class="pattern-type ${pattern.type}">${pattern.type.replace('_', '.')}</span>
                     </div>
-                    
-                    <p class="pattern-description">${DOMPurify.sanitize(pattern.description)}</p>
-                    
-                    ${renderWarningBanner(pattern)}
-                    
-                    ${renderMetadataBadges(pattern)}
-                    
-                    ${renderCodePreview(pattern.content, pattern.type, pattern.id)}
-                    
+                    <p class="pattern-description">${escapeHtml(pattern.description)}</p>
                     <div class="pattern-tags">
-                        ${(pattern.tags || []).map(tag => 
-                            `<a href="/?tag=${encodeURIComponent(tag)}" class="pattern-tag">#${DOMPurify.sanitize(tag)}</a>`
-                        ).join('')}
+                        ${pattern.tags ? pattern.tags.map(tag => 
+                            `<span class="tag">${escapeHtml(tag)}</span>`
+                        ).join('') : ''}
                     </div>
-                    
                     <div class="pattern-footer">
-                        <div class="pattern-stats">
-                            <span>⬆ ${pattern.votes_up || 0}</span>
-                            <span>📦 0 installs</span>
-                            <span>👤 ${pattern.submitter_name === 'clodonic-system' ? 'Clodonic Team' : DOMPurify.sanitize(pattern.submitter_name || 'Anonymous')}</span>
+                        <div class="vote-buttons">
+                            <button class="vote-btn" onclick="vote(event, ${pattern.id}, 'up')">
+                                👍 ${pattern.votes_up || 0}
+                            </button>
+                            <button class="vote-btn" onclick="vote(event, ${pattern.id}, 'down')">
+                                👎 ${pattern.votes_down || 0}
+                            </button>
                         </div>
-                        <button class="vote-btn${pattern.user_voted ? ' voted' : ''}" onclick="votePattern(${pattern.id}, 1)">
-                            ⬆ Vote
-                        </button>
+                        <span style="font-size: 12px; color: #999;">
+                            ${new Date(pattern.created_at).toLocaleDateString()}
+                        </span>
                     </div>
                 </div>
             `).join('');
-            
-            // Highlight syntax
-            if (typeof Prism !== 'undefined') {
-                Prism.highlightAll();
-            }
         }
         
-        // Vote on pattern
-        async function votePattern(id, vote) {
-            if (!currentUser) {
-                // Redirect to OAuth login
-                window.location.href = '/api/auth/github';
-                return;
-            }
+        function updateCounts(patterns) {
+            // Update filter counts
+            const counts = {
+                all: patterns.length,
+                claude_md: patterns.filter(p => p.type === 'claude_md').length,
+                agent: patterns.filter(p => p.type === 'agent').length,
+                prompt: patterns.filter(p => p.type === 'prompt').length,
+                hook: patterns.filter(p => p.type === 'hook').length,
+                command: patterns.filter(p => p.type === 'command').length
+            };
             
-            try {
-                const response = await fetch(`/api/items/${id}/vote`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ vote })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    // Update UI
-                    const card = document.querySelector(`[data-id="${id}"]`);
-                    const voteSpan = card.querySelector('.pattern-stats span:first-child');
-                    voteSpan.textContent = `⬆ ${data.votes_up}`;
-                    
-                    // Toggle vote button state
-                    const voteBtn = card.querySelector('.vote-btn');
-                    voteBtn.classList.toggle('voted');
-                } else if (response.status === 401) {
-                    // Session expired, redirect to login
-                    window.location.href = '/api/auth/github';
-                } else {
-                    throw new Error('Failed to vote');
-                }
-            } catch (error) {
-                console.error('Vote failed:', error);
-                // Only show alert for actual errors, not auth issues
-                if (error.message !== 'Failed to vote') {
-                    alert('Failed to vote. Please try again.');
-                }
-            }
-        }
-        
-        // Update stats
-        function updateStats(total) {
-            // Use the correct total from API, not the inflated number
-            document.getElementById('total-patterns').textContent = allPatterns.length;
-            
-            // Calculate total votes from loaded patterns
-            const totalVotes = allPatterns.reduce((sum, pattern) => sum + (pattern.votes_up || 0), 0);
-            document.getElementById('total-votes').textContent = totalVotes;
-        }
-        
-        // Load popular tags
-        async function loadPopularTags() {
-            try {
-                const response = await fetch('/api/tags');
-                const tags = await response.json();
-                
-                // Update total tags stat
-                document.getElementById('total-tags').textContent = tags.length;
-                
-                const container = document.getElementById('popular-tags');
-                container.innerHTML = `
-                    <h3>Popular Tags</h3>
-                    ${tags.slice(0, 10).map(tag => 
-                        `<a href="/?tag=${encodeURIComponent(tag.name)}" class="filter-option${currentTag === tag.name ? ' active' : ''}">
-                            ${tag.name} <span class="badge">${tag.count}</span>
-                        </a>`
-                    ).join('')}
-                `;
-            } catch (error) {
-                console.error('Failed to load tags:', error);
-            }
-        }
-        
-        // Search functionality
-        function performSearch(query) {
-            if (!query.trim()) {
-                renderPatterns(allPatterns);
-                return;
-            }
-            
-            const filtered = allPatterns.filter(pattern => 
-                pattern.title.toLowerCase().includes(query.toLowerCase()) ||
-                pattern.description.toLowerCase().includes(query.toLowerCase()) ||
-                (pattern.tags && pattern.tags.some(tag => 
-                    tag.toLowerCase().includes(query.toLowerCase())
-                ))
-            );
-            
-            renderPatterns(filtered);
-        }
-        
-        // Authentication functions
-        async function loadAuthStatus() {
-            try {
-                const response = await fetch('/api/auth/status');
-                const data = await response.json();
-                
-                const authSection = document.getElementById('auth-section');
-                if (data.authenticated) {
-                    currentUser = data;
-                    authSection.innerHTML = `
-                        <div class="user-menu">
-                            <img src="https://github.com/${data.username}.png?size=32" 
-                                 alt="${data.username}" class="user-avatar" onclick="toggleUserMenu()">
-                            <div class="user-dropdown" id="user-dropdown">
-                                <div class="user-info">
-                                    <div class="user-name">${data.username}</div>
-                                </div>
-                                <a href="/submit.html" class="dropdown-item">Submit Pattern</a>
-                                <button class="dropdown-item danger" onclick="logout()">Sign Out</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    authSection.innerHTML = `
-                        <a href="/api/auth/github" class="auth-btn github">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-                            </svg>
-                            Sign in with GitHub
-                        </a>
-                    `;
-                }
-            } catch (error) {
-                console.error('Failed to load auth status:', error);
-            }
-        }
-        
-        function toggleUserMenu() {
-            const dropdown = document.getElementById('user-dropdown');
-            dropdown.classList.toggle('active');
-        }
-        
-        async function logout() {
-            try {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                location.reload();
-            } catch (error) {
-                console.error('Logout failed:', error);
-            }
-        }
-        
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            updateActiveStates();
-            loadPatterns();
-            loadPopularTags();
-            loadAuthStatus();
-            
-            // Search input
-            const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => performSearch(e.target.value), 300);
-            });
-            
-            // Type pills
-            document.querySelectorAll('.type-pill').forEach(pill => {
-                pill.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const type = pill.dataset.type;
-                    currentType = type === currentType ? null : type;
-                    currentOffset = 0;
-                    updateActiveStates();
-                    updateUrl();
-                    loadPatterns();
-                });
-            });
-            
-            // Sort options
-            document.querySelectorAll('[data-sort]').forEach(option => {
-                option.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    currentSort = option.dataset.sort;
-                    currentOffset = 0;
-                    updateActiveStates();
-                    updateUrl();
-                    loadPatterns();
-                });
-            });
-            
-            // Close dropdowns on outside click
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.user-menu')) {
-                    document.querySelectorAll('.user-dropdown').forEach(d => d.classList.remove('active'));
-                }
-            });
-        });
-        
-        // Update type pill counts - always use full dataset for counts
-        function updateTypeCounts() {
-            const typeCounts = {};
-            // Use fullPatternDataset to maintain accurate counts regardless of filtering
-            const datasetToUse = fullPatternDataset.length ? fullPatternDataset : allPatterns;
-            datasetToUse.forEach(pattern => {
-                typeCounts[pattern.type] = (typeCounts[pattern.type] || 0) + 1;
-            });
-            
-            document.querySelectorAll('.type-pill').forEach(pill => {
-                const type = pill.dataset.type;
-                const countSpan = pill.querySelector('.count');
-                if (type === '') {
-                    countSpan.textContent = datasetToUse.length;
-                } else {
-                    countSpan.textContent = typeCounts[type] || 0;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                const type = btn.dataset.type;
+                const count = btn.querySelector('.filter-count');
+                if (count) {
+                    count.textContent = counts[type] || 0;
                 }
             });
         }
         
-        // Call updateTypeCounts after loading patterns - always maintain total counts
-        const originalRenderPatterns = renderPatterns;
-        renderPatterns = function(patterns) {
-            originalRenderPatterns(patterns);
-            // Always update counts based on full dataset, not filtered results
-            updateTypeCounts();
-        };
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function viewPattern(id) {
+            window.location.href = `/pattern/${id}`;
+        }
+        
+        function vote(event, patternId, direction) {
+            event.stopPropagation();
+            // Voting logic would go here
+            console.log('Vote:', patternId, direction);
+        }
+        
+        function filterPatterns(query) {
+            // Filter logic
+            console.log('Filter:', query);
+        }
+        
+        function filterByType(type) {
+            // Type filter logic
+            console.log('Filter by type:', type);
+        }
+        
+        function sortPatterns(sortBy) {
+            // Sort logic
+            console.log('Sort by:', sortBy);
+        }
     </script>
 </body>
 </html>
