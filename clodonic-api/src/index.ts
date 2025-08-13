@@ -19,7 +19,7 @@ import { validateContentStructure } from './contentValidators';
 
 type Bindings = {
   DB: D1Database;
-  BUCKET: R2Bucket;
+  // BUCKET: R2Bucket; // TODO: Add when implementing audit logs or file storage
   ASSETS: any;
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
