@@ -9,6 +9,8 @@ interface RateLimitConfig {
   limit: number;         // Max requests
   windowMs: number;      // Time window in milliseconds
   message?: string;      // Custom error message
+  userId?: number;       // Optional user ID for user-based limits (2025 enhancement)
+  userMultiplier?: number; // Multiplier for authenticated users (e.g., 2 = double the limit)
 }
 
 export async function checkCFRateLimit(
@@ -26,8 +28,28 @@ export async function checkCFRateLimit(
   // For Cloudflare Workers, we can also use CF-Ray for more granular tracking
   const cfRay = c.req.header('CF-Ray');
   
-  // Create a unique key for this client and action
-  const rateLimitKey = `rate_limit:${config.key}:${ip}`;
+  // Enhanced rate limiting (2025): Support user-based limits
+  let rateLimitKey: string;
+  let effectiveLimit = config.limit;
+  
+  if (config.userId) {
+    // User-based rate limiting - each user gets their own bucket
+    rateLimitKey = `rate_limit:${config.key}:user:${config.userId}`;
+    
+    // Authenticated users can get higher limits
+    if (config.userMultiplier) {
+      effectiveLimit = Math.floor(config.limit * config.userMultiplier);
+    }
+    
+    logger.info('User-based rate limit check', {
+      userId: config.userId,
+      key: config.key,
+      limit: effectiveLimit
+    });
+  } else {
+    // IP-based rate limiting (default)
+    rateLimitKey = `rate_limit:${config.key}:ip:${ip}`;
+  }
   
   try {
     // Use Cloudflare's Cache API for rate limiting
@@ -55,19 +77,21 @@ export async function checkCFRateLimit(
       }
     }
     
-    // Check if limit exceeded
-    if (count >= config.limit) {
+    // Check if limit exceeded (use effective limit for user-based)
+    if (count >= effectiveLimit) {
       logger.warn('Rate limit exceeded', {
         ip,
         cfRay,
         key: config.key,
         count,
-        limit: config.limit,
+        limit: effectiveLimit,
+        isUserLimit: !!config.userId,
+        userId: config.userId,
         resetTime: new Date(resetTime).toISOString()
       });
       
       // Set rate limit headers
-      c.header('X-RateLimit-Limit', config.limit.toString());
+      c.header('X-RateLimit-Limit', effectiveLimit.toString());
       c.header('X-RateLimit-Remaining', '0');
       c.header('X-RateLimit-Reset', resetTime.toString());
       c.header('Retry-After', Math.ceil((resetTime - Date.now()) / 1000).toString());
@@ -88,20 +112,22 @@ export async function checkCFRateLimit(
     
     await cache.put(cacheKey, response);
     
-    // Set rate limit headers for successful requests
-    c.header('X-RateLimit-Limit', config.limit.toString());
-    c.header('X-RateLimit-Remaining', (config.limit - count).toString());
+    // Set rate limit headers for successful requests (use effective limit)
+    c.header('X-RateLimit-Limit', effectiveLimit.toString());
+    c.header('X-RateLimit-Remaining', (effectiveLimit - count).toString());
     c.header('X-RateLimit-Reset', resetTime.toString());
     
     // Log if approaching limit
-    if (count > config.limit * 0.8) {
+    if (count > effectiveLimit * 0.8) {
       logger.info('Rate limit warning', {
         ip,
         cfRay,
         key: config.key,
         count,
-        limit: config.limit,
-        remaining: config.limit - count
+        limit: effectiveLimit,
+        remaining: effectiveLimit - count,
+        isUserLimit: !!config.userId,
+        userId: config.userId
       });
     }
     
@@ -135,6 +161,50 @@ export function cfRateLimitMiddleware(
       return c.json({ 
         error: message || 'Too many requests. Please try again later.',
         retryAfter: c.res.headers.get('Retry-After')
+      }, 429);
+    }
+    
+    await next();
+  };
+}
+
+// Enhanced middleware for user-aware rate limiting (2025 security enhancement)
+export function userAwareRateLimitMiddleware(
+  key: string,
+  anonymousLimit: number,
+  authenticatedMultiplier: number, // e.g., 2 = authenticated users get 2x the limit
+  windowMs: number,
+  message?: string
+) {
+  return async (c: Context, next: () => Promise<void>) => {
+    // Try to get user session
+    const { getUserFromRequest } = await import('./auth');
+    const session = await getUserFromRequest(c);
+    
+    const config: RateLimitConfig = {
+      key,
+      limit: anonymousLimit,
+      windowMs,
+      message
+    };
+    
+    // Apply user-based rate limiting if authenticated
+    if (session?.userId) {
+      config.userId = session.userId;
+      config.userMultiplier = authenticatedMultiplier;
+    }
+    
+    const allowed = await checkCFRateLimit(c, config);
+    
+    if (!allowed) {
+      const errorMessage = session?.userId 
+        ? `Rate limit exceeded for user ${session.username}. ${message || 'Please wait before trying again.'}`
+        : message || 'Too many requests. Please try again later or sign in for higher limits.';
+        
+      return c.json({ 
+        error: errorMessage,
+        retryAfter: c.res.headers.get('Retry-After'),
+        authenticated: !!session?.userId
       }, 429);
     }
     

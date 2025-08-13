@@ -290,18 +290,42 @@ export class ClodonicMCP extends McpAgent {
 		const author = pattern.submitter_name || "Anonymous";
 		const date = new Date().toISOString().split("T")[0];
 		
-		// Parse and display warnings if present
+		// Enhanced security warnings (2025 best practice)
 		let warningMessage = "";
+		
+		// Type-specific execution warnings
+		const executionRisks: Record<string, string> = {
+			hook: "⚠️ **EXECUTION WARNING**: This hook will execute shell commands on your system",
+			command: "⚠️ **EXECUTION WARNING**: This command may execute system operations",
+			agent: "🤖 **AGENT WARNING**: This agent can perform autonomous actions with your permissions",
+			claude_md: "📝 **INSTRUCTION WARNING**: This will modify Claude Code's behavior and capabilities",
+			prompt: "💬 **PROMPT WARNING**: This will influence Claude Code's responses"
+		};
+		
+		if (executionRisks[pattern.type]) {
+			warningMessage = `\n${executionRisks[pattern.type]}\n`;
+		}
+		
+		// Add specific security warnings if flagged
 		if (pattern.has_warnings && pattern.warning_flags) {
 			try {
 				const warnings = JSON.parse(pattern.warning_flags);
-				warningMessage = `\n⚠️ **SECURITY WARNING** ⚠️\nThis pattern has been flagged with the following warnings:\n`;
+				warningMessage += `\n🔒 **SECURITY WARNINGS DETECTED** 🔒\n`;
+				warningMessage += `This pattern has been flagged with security concerns:\n\n`;
 				warnings.forEach((warning: string) => {
-					warningMessage += `• ${warning}\n`;
+					// Enhanced warning display with categorization
+					if (warning.includes("Security:")) {
+						warningMessage += `  🚨 ${warning}\n`;
+					} else if (warning.includes("Structure:")) {
+						warningMessage += `  ⚡ ${warning}\n`;
+					} else {
+						warningMessage += `  ⚠️ ${warning}\n`;
+					}
 				});
-				warningMessage += `\n**Please review the pattern carefully before installation.**\n\n`;
+				warningMessage += `\n**⚠️ REVIEW CODE CAREFULLY BEFORE INSTALLATION ⚠️**\n`;
+				warningMessage += `**Never install patterns that you don't understand or trust.**\n\n`;
 			} catch (e) {
-				warningMessage = `\n⚠️ **WARNING**: This pattern has security warnings. Review carefully before use.\n\n`;
+				warningMessage += `\n⚠️ **WARNING**: This pattern has security warnings. Review carefully before use.\n\n`;
 			}
 		}
 

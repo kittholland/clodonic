@@ -12,7 +12,7 @@ import {
   deleteSession
 } from './auth';
 import { loggerMiddleware, getLogger } from './logger';
-import { cfRateLimitMiddleware } from './cfRateLimit';
+import { cfRateLimitMiddleware, userAwareRateLimitMiddleware } from './cfRateLimit';
 import { validateContent } from './validation';
 import { parseSubmission } from './schemas';
 import { validateContentStructure } from './contentValidators';
@@ -24,6 +24,7 @@ type Bindings = {
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
   SITE_URL?: string;
+  SESSION_SECRET?: string; // For session encryption (2025 security)
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -37,18 +38,22 @@ app.use('*', async (c, next) => {
   c.header('X-Frame-Options', 'DENY');
   c.header('X-XSS-Protection', '1; mode=block');
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   
-  // Basic CSP - allows our own scripts plus CDN libraries
+  // Enhanced CSP - Still allows unsafe-inline but with other restrictions
+  // TODO: Migrate to nonce-based or move scripts to external files
   c.header('Content-Security-Policy', 
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://challenges.cloudflare.com; " +
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
     "img-src 'self' data: https:; " +
     "font-src 'self' data: https://cdnjs.cloudflare.com; " +
-    "connect-src 'self'; " +
+    "connect-src 'self' https://challenges.cloudflare.com; " +
+    "frame-src https://challenges.cloudflare.com; " +
     "frame-ancestors 'none'; " +
     "base-uri 'self'; " +
-    "form-action 'self' https://github.com"
+    "form-action 'self' https://github.com; " +
+    "upgrade-insecure-requests"
   );
 });
 
@@ -232,11 +237,12 @@ app.get('/api/items/:id', async (c) => {
   });
 });
 
-// Upload item (anonymous allowed)
+// Upload item (enhanced rate limiting for authenticated users - 2025)
 app.post('/api/items', 
-  cfRateLimitMiddleware(
+  userAwareRateLimitMiddleware(
     'upload',
-    30,                      // 30 submissions
+    30,                      // Anonymous: 30 submissions per hour
+    2,                       // Authenticated: 2x limit (60 submissions per hour)
     60 * 60 * 1000,         // per hour
     'Too many pattern submissions. Please wait before submitting again.'
   ),
@@ -479,12 +485,13 @@ app.get('/api/search', async (c) => {
   });
 });
 
-// Vote on item
+// Vote on item (enhanced rate limiting - authenticated users only anyway)
 app.post('/api/items/:id/vote', 
-  cfRateLimitMiddleware(
+  userAwareRateLimitMiddleware(
     'vote',
-    10,              // 10 votes
-    60 * 1000,      // per minute
+    5,               // Anonymous: 5 votes per minute (shouldn't happen, auth required)
+    3,               // Authenticated: 3x limit (15 votes per minute)
+    60 * 1000,       // per minute
     'Voting too quickly. Please slow down.'
   ),
   async (c) => {
@@ -719,8 +726,19 @@ app.get('/api/auth/github/callback', async (c) => {
       user.display_name = githubUser.name || githubUser.login;
     }
     
-    // Create session in D1
-    const sessionId = await createSession(c.env.DB, user.id as number, user.username as string);
+    // Create encrypted session in D1 (2025 security enhancement)
+    const sessionSecret = c.env.SESSION_SECRET || c.env.GITHUB_CLIENT_SECRET; // Use dedicated secret or fallback
+    const ip = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For');
+    const userAgent = c.req.header('User-Agent');
+    
+    const sessionId = await createSession(
+      c.env.DB, 
+      user.id as number, 
+      user.username as string,
+      sessionSecret,
+      ip,
+      userAgent
+    );
     
     // Set session cookie
     setCookie(c, 'session_id', sessionId, {
