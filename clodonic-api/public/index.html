@@ -811,8 +811,9 @@
         
         async function loadPatterns() {
             try {
-                const response = await fetch('/api/patterns');
-                const patterns = await response.json();
+                const response = await fetch('/api/items');
+                const data = await response.json();
+                const patterns = data.items || [];
                 displayPatterns(patterns);
                 updateCounts(patterns);
             } catch (error) {
@@ -846,9 +847,6 @@
                         <div class="vote-buttons">
                             <button class="vote-btn" onclick="vote(event, ${pattern.id}, 'up')">
                                 👍 ${pattern.votes_up || 0}
-                            </button>
-                            <button class="vote-btn" onclick="vote(event, ${pattern.id}, 'down')">
-                                👎 ${pattern.votes_down || 0}
                             </button>
                         </div>
                         <span style="font-size: 12px; color: #999;">
