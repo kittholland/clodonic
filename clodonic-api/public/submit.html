@@ -1702,14 +1702,11 @@ npm test     # Run tests
                 if (response.ok) {
                     const user = await response.json();
                     // User is logged in - patterns will be attributed to them
-                    console.log('Submitting as:', user.username);
                 } else {
                     // Anonymous submission - totally fine!
-                    console.log('Submitting anonymously');
                 }
             } catch (error) {
                 // Anonymous submission
-                console.log('Submitting anonymously');
             }
         }
         
