@@ -776,6 +776,7 @@
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
             loadPatterns();
+            loadPopularTags();
             setupEventListeners();
         });
         
@@ -813,13 +814,35 @@
             try {
                 const response = await fetch('/api/items');
                 const data = await response.json();
-                const patterns = data.items || [];
-                displayPatterns(patterns);
-                updateCounts(patterns);
+                allPatterns = data.items || [];
+                displayPatterns(allPatterns);
+                updateCounts(allPatterns);
             } catch (error) {
                 console.error('Error loading patterns:', error);
                 document.getElementById('patterns-grid').innerHTML = 
                     '<div class="empty-state"><h3>Unable to load patterns</h3><p>Please try refreshing the page.</p></div>';
+            }
+        }
+        
+        async function loadPopularTags() {
+            try {
+                const response = await fetch('/api/tags');
+                const tags = await response.json();
+                const tagsContainer = document.getElementById('popular-tags');
+                
+                if (tags && tags.length > 0) {
+                    // Take top 10 most popular tags
+                    const topTags = tags.slice(0, 10);
+                    tagsContainer.innerHTML = topTags.map(tag => 
+                        `<a href="/?tag=${encodeURIComponent(tag.name)}" class="tag" style="text-decoration: none;">
+                            ${escapeHtml(tag.name)} (${tag.count})
+                        </a>`
+                    ).join('');
+                } else {
+                    tagsContainer.innerHTML = '<span style="color: #999; font-size: 13px;">No tags yet</span>';
+                }
+            } catch (error) {
+                console.error('Error loading tags:', error);
             }
         }
         
@@ -895,18 +918,68 @@
         }
         
         function filterPatterns(query) {
-            // Filter logic
-            console.log('Filter:', query);
+            applyFiltersAndSort();
         }
         
+        let allPatterns = [];
+        let currentFilter = 'all';
+        let currentSort = 'trending';
+        
         function filterByType(type) {
-            // Type filter logic
-            console.log('Filter by type:', type);
+            currentFilter = type;
+            applyFiltersAndSort();
         }
         
         function sortPatterns(sortBy) {
-            // Sort logic
-            console.log('Sort by:', sortBy);
+            currentSort = sortBy;
+            applyFiltersAndSort();
+        }
+        
+        function applyFiltersAndSort() {
+            let filtered = [...allPatterns];
+            
+            // Apply type filter
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(p => p.type === currentFilter);
+            }
+            
+            // Apply search filter if there's a search query
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            if (searchQuery) {
+                filtered = filtered.filter(p => 
+                    p.title.toLowerCase().includes(searchQuery) ||
+                    p.description.toLowerCase().includes(searchQuery) ||
+                    (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchQuery)))
+                );
+            }
+            
+            // Apply sorting
+            switch(currentSort) {
+                case 'votes':
+                    filtered.sort((a, b) => (b.votes_up || 0) - (a.votes_up || 0));
+                    break;
+                case 'recent':
+                    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+                case 'trending':
+                default:
+                    // Simple trending: combination of votes and recency
+                    filtered.sort((a, b) => {
+                        const scoreA = (a.votes_up || 0) + (30 - Math.min(30, daysSince(a.created_at)));
+                        const scoreB = (b.votes_up || 0) + (30 - Math.min(30, daysSince(b.created_at)));
+                        return scoreB - scoreA;
+                    });
+                    break;
+            }
+            
+            displayPatterns(filtered);
+        }
+        
+        function daysSince(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
     </script>
 </body>
